@@ -6,7 +6,12 @@ use App\Http\Controllers\examenjaimecontroller;
 use App\Http\Controllers\accesocontroller;
 use App\Http\Controllers\jquerycontroller;
 use App\Http\Controllers\actividadescontroller;
+use App\Http\Controllers\citascontroller;
 
+// --- Rutas de Citas ---
+Route::get('altacita',     [citascontroller::class, 'altacita'])->name('altacita');
+Route::get('cargacarrito', [citascontroller::class, 'cargacarrito'])->name('cargacarrito');
+Route::get('reportecitas', [citascontroller::class, 'reporte'])->name('reportecitas');
 
 
 // --- Rutas de Empleados ---
