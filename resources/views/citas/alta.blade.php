@@ -5,33 +5,24 @@
 <script type="text/javascript">
 $(document).ready(function(){
 
-    // ── Mostrar/ocultar campos según género ───────────────────
     $("#idtc").change(function(){
         var genero = this.value;
+
+        $("#bloque-hombre, #bloque-mujer").hide();
+        $("#bloque-servicios-h, #bloque-servicios-m").hide();
+
         if(genero == 1){
-            // Hombre
             $("#bloque-hombre").show();
-            $("#bloque-mujer").hide();
             $("#bloque-servicios-h").show();
-            $("#bloque-servicios-m").hide();
         } else if(genero == 2){
-            // Mujer
-            $("#bloque-hombre").hide();
             $("#bloque-mujer").show();
-            $("#bloque-servicios-h").hide();
             $("#bloque-servicios-m").show();
-        } else {
-            $("#bloque-hombre").hide();
-            $("#bloque-mujer").hide();
-            $("#bloque-servicios-h").hide();
-            $("#bloque-servicios-m").hide();
         }
     });
 
-    // ── Botón Agregar al Carrito (AJAX igual que actividades) ─
     $("#btn-agregar").click(function(){
         $("#carrito").load(
-            '{{ url("cargacarrito") }}' + '?' + $(this).closest('form').serialize()
+            '{{ url("cargacarrito") }}' + '?' + $("#form-cita").serialize()
         );
     });
 
@@ -43,30 +34,32 @@ $(document).ready(function(){
 
 <form id="form-cita">
 
-    {{-- ── IDENTIFICACIÓN ─────────────────────────────────────── --}}
     <table>
         <tr>
-            <td><label>IDC (Cliente)</label></td>
+            <td><label>IDC </label></td>
             <td><input type="text" name="idc" id="idc" value="{{ $sigue }}" readonly></td>
         </tr>
     </table>
 
+    {{-- IDs autogenerados para cita y fecha_hora_cita --}}
+    <input type="hidden" name="idac"  value="{{ $sigueCita }}">
+    <input type="hidden" name="idfhc" value="{{ $sigueFhc }}">
+
     <hr>
 
-    {{-- ── DATOS DEL CLIENTE ──────────────────────────────────── --}}
     <h3>Datos del Cliente</h3>
     <table>
         <tr>
             <td><label>Nombre</label></td>
-            <td><input type="text" name="nombre" id="nombre" placeholder="Ej. Claudia"></td>
+            <td><input type="text" name="nombre" ></td>
         </tr>
         <tr>
             <td><label>Apellido Paterno</label></td>
-            <td><input type="text" name="ap" id="ap" placeholder="Ej. López"></td>
+            <td><input type="text" name="ap" ></td>
         </tr>
         <tr>
             <td><label>Teléfono</label></td>
-            <td><input type="text" name="telefono" id="telefono" placeholder="10 dígitos" maxlength="15"></td>
+            <td><input type="text" name="telefono"  maxlength="10"></td>
         </tr>
         <tr>
             <td><label>Género</label></td>
@@ -81,30 +74,24 @@ $(document).ready(function(){
         </tr>
         <tr>
             <td><label>Fecha de Cita</label></td>
-            <td><input type="date" name="fecha" id="fecha"></td>
+            <td><input type="date" name="fecha"></td>
         </tr>
         <tr>
             <td><label>Hora de Inicio</label></td>
-            <td><input type="time" name="hora" id="hora"></td>
+            <td><input type="time" name="hora"></td>
         </tr>
     </table>
 
-    {{-- IDs ocultos que se generan automáticamente --}}
-    <input type="hidden" name="idac"  value="1">
-    <input type="hidden" name="idfhc" value="1">
-
     <hr>
 
-    {{-- ── SERVICIO DE CABELLO ─────────────────────────────────── --}}
     <h3>Servicio de Cabello</h3>
 
-    {{-- Campos para HOMBRE --}}
     <div id="bloque-hombre" style="display:none;">
         <table>
             <tr>
                 <td><label>Largo del Cabello</label></td>
                 <td>
-                    <select name="idlch" id="idlch">
+                    <select name="idlch">
                         <option value="">-- Seleccionar --</option>
                         @foreach($largosh as $l)
                             <option value="{{ $l->idlch }}">{{ $l->largo }}</option>
@@ -115,7 +102,7 @@ $(document).ready(function(){
             <tr>
                 <td><label>Tipo de Corte</label></td>
                 <td>
-                    <select name="idtch" id="idtch">
+                    <select name="idtch">
                         <option value="">-- Seleccionar --</option>
                         @foreach($cortesh as $c)
                             <option value="{{ $c->idtch }}">{{ $c->corte }}</option>
@@ -126,13 +113,12 @@ $(document).ready(function(){
         </table>
     </div>
 
-    {{-- Campos para MUJER --}}
     <div id="bloque-mujer" style="display:none;">
         <table>
             <tr>
                 <td><label>Largo del Cabello</label></td>
                 <td>
-                    <select name="idlcm" id="idlcm">
+                    <select name="idlcm">
                         <option value="">-- Seleccionar --</option>
                         @foreach($largosm as $l)
                             <option value="{{ $l->idlcm }}">{{ $l->largo }}</option>
@@ -143,7 +129,7 @@ $(document).ready(function(){
             <tr>
                 <td><label>Tipo de Corte</label></td>
                 <td>
-                    <select name="idtcm" id="idtcm">
+                    <select name="idtcm">
                         <option value="">-- Seleccionar --</option>
                         @foreach($cortesm as $c)
                             <option value="{{ $c->idtcm }}">{{ $c->corte }}</option>
@@ -154,7 +140,7 @@ $(document).ready(function(){
             <tr>
                 <td><label>Flequillo</label></td>
                 <td>
-                    <select name="idf" id="idf">
+                    <select name="idf">
                         <option value="">Sin flequillo</option>
                         @foreach($flequillos as $f)
                             <option value="{{ $f->idf }}">{{ $f->flequillo }}</option>
@@ -165,12 +151,11 @@ $(document).ready(function(){
         </table>
     </div>
 
-    {{-- Estilo (común para ambos géneros) --}}
     <table>
         <tr>
             <td><label>Estilo de Cabello</label></td>
             <td>
-                <select name="idec" id="idec">
+                <select name="idec">
                     <option value="">-- Seleccionar --</option>
                     @foreach($estilos as $e)
                         <option value="{{ $e->idec }}">{{ $e->estilo }}</option>
@@ -182,14 +167,12 @@ $(document).ready(function(){
 
     <hr>
 
-    {{-- ── SERVICIOS ADICIONALES ──────────────────────────────── --}}
     <h3>Servicios Adicionales</h3>
 
-    {{-- Servicios Hombre --}}
     <div id="bloque-servicios-h" style="display:none;">
         <table>
             @foreach($servicios as $s)
-                @if($s->ids != 4) {{-- excluye Depilación --}}
+                @if($s->ids != 4)
                 <tr>
                     <td>
                         <label>
@@ -200,15 +183,14 @@ $(document).ready(function(){
                 </tr>
                 @endif
             @endforeach
-            <tr><td><label><input type="radio" name="ids" value=""> Ninguno</label></td></tr>
+            <tr><td><label><input type="radio" name="ids" value="" checked> Ninguno</label></td></tr>
         </table>
     </div>
 
-    {{-- Servicios Mujer --}}
     <div id="bloque-servicios-m" style="display:none;">
         <table>
             @foreach($servicios as $s)
-                @if($s->ids != 3) {{-- excluye Afeitado --}}
+                @if($s->ids != 3)
                 <tr>
                     <td>
                         <label>
@@ -219,7 +201,7 @@ $(document).ready(function(){
                 </tr>
                 @endif
             @endforeach
-            <tr><td><label><input type="radio" name="ids" value=""> Ninguno</label></td></tr>
+            <tr><td><label><input type="radio" name="ids" value="" checked> Ninguno</label></td></tr>
         </table>
     </div>
 
@@ -230,7 +212,6 @@ $(document).ready(function(){
 
 <hr>
 
-{{-- ── CARRITO (se carga vía AJAX) ───────────────────────────── --}}
 <h2>Carrito</h2>
 <div id="carrito"></div>
 
