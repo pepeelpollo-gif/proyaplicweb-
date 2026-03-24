@@ -7,10 +7,8 @@ $(document).ready(function(){
 
     $("#idtc").change(function(){
         var genero = this.value;
-
         $("#bloque-hombre, #bloque-mujer").hide();
         $("#bloque-servicios-h, #bloque-servicios-m").hide();
-
         if(genero == 1){
             $("#bloque-hombre").show();
             $("#bloque-servicios-h").show();
@@ -22,7 +20,7 @@ $(document).ready(function(){
 
     $("#btn-agregar").click(function(){
         $("#carrito").load(
-            '{{ url("cargacarrito") }}' + '?' + $("#form-cita").serialize()
+            '{{ url("cargacarritocitas") }}' + '?' + $("#form-cita").serialize()
         );
     });
 
@@ -34,32 +32,23 @@ $(document).ready(function(){
 
 <form id="form-cita">
 
-    <table>
-        <tr>
-            <td><label>IDC </label></td>
-            <td><input type="text" name="idc" id="idc" value="{{ $sigue }}" readonly></td>
-        </tr>
-    </table>
-
-    {{-- IDs autogenerados para cita y fecha_hora_cita --}}
-    <input type="hidden" name="idac"  value="{{ $sigueCita }}">
-    <input type="hidden" name="idfhc" value="{{ $sigueFhc }}">
-
-    <hr>
-
     <h3>Datos del Cliente</h3>
     <table>
         <tr>
+            <td><label>IDC</label></td>
+            <td><input type="text" name="idc" value="{{ $sigue }}" readonly></td>
+        </tr>
+        <tr>
             <td><label>Nombre</label></td>
-            <td><input type="text" name="nombre" ></td>
+            <td><input type="text" name="nombre"></td>
         </tr>
         <tr>
             <td><label>Apellido Paterno</label></td>
-            <td><input type="text" name="ap" ></td>
+            <td><input type="text" name="ap"></td>
         </tr>
         <tr>
             <td><label>Teléfono</label></td>
-            <td><input type="text" name="telefono"  maxlength="10"></td>
+            <td><input type="text" name="telefono" maxlength="15"></td>
         </tr>
         <tr>
             <td><label>Género</label></td>
@@ -83,7 +72,6 @@ $(document).ready(function(){
     </table>
 
     <hr>
-
     <h3>Servicio de Cabello</h3>
 
     <div id="bloque-hombre" style="display:none;">
@@ -166,21 +154,13 @@ $(document).ready(function(){
     </table>
 
     <hr>
-
     <h3>Servicios Adicionales</h3>
 
     <div id="bloque-servicios-h" style="display:none;">
         <table>
             @foreach($servicios as $s)
                 @if($s->ids != 4)
-                <tr>
-                    <td>
-                        <label>
-                            <input type="radio" name="ids" value="{{ $s->ids }}">
-                            {{ $s->servicio }}
-                        </label>
-                    </td>
-                </tr>
+                <tr><td><label><input type="radio" name="ids" value="{{ $s->ids }}"> {{ $s->servicio }}</label></td></tr>
                 @endif
             @endforeach
             <tr><td><label><input type="radio" name="ids" value="" checked> Ninguno</label></td></tr>
@@ -191,14 +171,7 @@ $(document).ready(function(){
         <table>
             @foreach($servicios as $s)
                 @if($s->ids != 3)
-                <tr>
-                    <td>
-                        <label>
-                            <input type="radio" name="ids" value="{{ $s->ids }}">
-                            {{ $s->servicio }}
-                        </label>
-                    </td>
-                </tr>
+                <tr><td><label><input type="radio" name="ids" value="{{ $s->ids }}"> {{ $s->servicio }}</label></td></tr>
                 @endif
             @endforeach
             <tr><td><label><input type="radio" name="ids" value="" checked> Ninguno</label></td></tr>
@@ -211,7 +184,6 @@ $(document).ready(function(){
 </form>
 
 <hr>
-
 <h2>Carrito</h2>
 <div id="carrito"></div>
 

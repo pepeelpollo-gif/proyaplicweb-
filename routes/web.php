@@ -9,10 +9,10 @@ use App\Http\Controllers\actividadescontroller;
 use App\Http\Controllers\citascontroller;
 
 // --- Rutas de Citas ---
-Route::get('altacita',     [citascontroller::class, 'altacita'])->name('altacita');
-Route::get('cargacarrito', [citascontroller::class, 'cargacarrito'])->name('cargacarrito');
-Route::get('reportecitas', [citascontroller::class, 'reporte'])->name('reportecitas');
-
+Route::get('altacita',          [citascontroller::class, 'altacita'])->name('altacita');
+Route::get('cargacarritocitas', [citascontroller::class, 'cargacarrito'])->name('cargacarritocitas');
+Route::get('reportecitas',      [citascontroller::class, 'reporte'])->name('reportecitas');
+Route::get('eliminadetalle', [citascontroller::class, 'eliminadetalle'])->name('eliminadetalle');
 
 // --- Rutas de Empleados ---
 Route::get('inicio',[empleadoscontroller::class,'inicio'])->name('inicio');

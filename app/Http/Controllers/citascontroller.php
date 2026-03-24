@@ -10,17 +10,10 @@ use App\Models\detalles;
 
 class citascontroller extends Controller
 {
-    // Carga el formulario con todos los catálogos
     public function altacita()
     {
         $ultimocliente = \DB::select("SELECT idc FROM clientes ORDER BY idc DESC LIMIT 1");
         $sigue = count($ultimocliente) == 0 ? 1 : $ultimocliente[0]->idc + 1;
-
-        $ultimacita = \DB::select("SELECT idac FROM citas ORDER BY idac DESC LIMIT 1");
-        $sigueCita  = count($ultimacita) == 0 ? 1 : $ultimacita[0]->idac + 1;
-
-        $ultimafh = \DB::select("SELECT idfhc FROM fecha_hora_cita ORDER BY idfhc DESC LIMIT 1");
-        $sigueFhc = count($ultimafh) == 0 ? 1 : $ultimafh[0]->idfhc + 1;
 
         $tiposcliente = \DB::select("SELECT idtc, tipo_cliente FROM tipo_cliente ORDER BY idtc ASC");
         $largosh      = \DB::select("SELECT idlch, largo FROM largo_cabello_h ORDER BY idlch ASC");
@@ -33,8 +26,6 @@ class citascontroller extends Controller
 
         return view('citas.alta')
             ->with('sigue',        $sigue)
-            ->with('sigueCita',    $sigueCita)
-            ->with('sigueFhc',     $sigueFhc)
             ->with('tiposcliente', $tiposcliente)
             ->with('largosh',      $largosh)
             ->with('largosm',      $largosm)
@@ -45,13 +36,11 @@ class citascontroller extends Controller
             ->with('estilos',      $estilos);
     }
 
-    // Guarda los datos y devuelve la vista parcial del carrito vía AJAX
     public function cargacarrito(Request $request)
     {
-        $idac  = (int) $request->idac;
-        $idc   = (int) $request->idc;
-        $idfhc = (int) $request->idfhc;
+        $idc = (int) $request->idc;
 
+        // 1. Guardar cliente si no existe
         $existeCliente = \DB::select("SELECT COUNT(*) as cuantos FROM clientes WHERE idc = ?", [$idc]);
         if ($existeCliente[0]->cuantos == 0) {
             $cliente           = new clientes;
@@ -62,24 +51,27 @@ class citascontroller extends Controller
             $cliente->save();
         }
 
-        $existeFhc = \DB::select("SELECT COUNT(*) as cuantos FROM fecha_hora_cita WHERE idfhc = ?", [$idfhc]);
-        if ($existeFhc[0]->cuantos == 0) {
-            $fhc        = new fecha_hora_cita;
-            $fhc->idfhc = $idfhc;
-            $fhc->fecha = $request->fecha;
-            $fhc->hora  = $request->hora;
-            $fhc->save();
+        // 2. Guardar fecha/hora — dejar que AUTO_INCREMENT genere el ID
+        //    Solo insertar una vez por sesion de cita (verificamos por idc en citas)
+        $existeCita = \DB::select("SELECT idac, idfhc FROM citas WHERE idc = ? LIMIT 1", [$idc]);
+
+        if (count($existeCita) == 0) {
+            // Insertar fecha_hora_cita y obtener el ID generado
+            \DB::insert("INSERT INTO fecha_hora_cita (fecha, hora) VALUES (?, ?)", [
+                $request->fecha,
+                $request->hora
+            ]);
+            $idfhc = \DB::getPdo()->lastInsertId();
+
+            // Insertar cita cabecera
+            \DB::insert("INSERT INTO citas (idc, idfhc) VALUES (?, ?)", [$idc, $idfhc]);
+            $idac = \DB::getPdo()->lastInsertId();
+        } else {
+            $idac  = $existeCita[0]->idac;
+            $idfhc = $existeCita[0]->idfhc;
         }
 
-        $existeCita = \DB::select("SELECT COUNT(*) as cuantos FROM citas WHERE idac = ?", [$idac]);
-        if ($existeCita[0]->cuantos == 0) {
-            $cita        = new citas;
-            $cita->idac  = $idac;
-            $cita->idc   = $idc;
-            $cita->idfhc = $idfhc;
-            $cita->save();
-        }
-
+        // 3. Insertar detalle
         $det       = new detalles;
         $det->idac = $idac;
         $det->idtc = $request->idtc;
@@ -102,31 +94,33 @@ class citascontroller extends Controller
         $det->ids = $request->ids ?: null;
         $det->save();
 
+        // 4. Traer carrito actualizado
         $carrito = \DB::select("
-            SELECT
-                tc.tipo_cliente                  AS genero,
-                COALESCE(lh.largo,  lm.largo)    AS largo,
-                COALESCE(ch.corte,  cm.corte)    AS corte,
-                COALESCE(f.flequillo, 'N/A')     AS flequillo,
-                ec.estilo,
-                COALESCE(sa.servicio, 'Ninguno') AS servicio
-            FROM detalles AS d
-            INNER JOIN tipo_cliente    AS tc ON tc.idtc  = d.idtc
-            INNER JOIN estilo_cabello  AS ec ON ec.idec  = d.idec
-            LEFT  JOIN largo_cabello_h AS lh ON lh.idlch = d.idlch
-            LEFT  JOIN largo_cabello_m AS lm ON lm.idlcm = d.idlcm
-            LEFT  JOIN tipo_corte_h    AS ch ON ch.idtch = d.idtch
-            LEFT  JOIN tipo_corte_m    AS cm ON cm.idtcm = d.idtcm
-            LEFT  JOIN flequillo       AS f  ON f.idf    = d.idf
-            LEFT  JOIN servicios_add   AS sa ON sa.ids   = d.ids
-            WHERE d.idac = ?
-            ORDER BY d.idd ASC
-        ", [$idac]);
+    SELECT
+        d.idd,
+        d.idac,
+        tc.tipo_cliente                  AS genero,
+        COALESCE(lh.largo,  lm.largo)    AS largo,
+        COALESCE(ch.corte,  cm.corte)    AS corte,
+        COALESCE(f.flequillo, 'N/A')     AS flequillo,
+        ec.estilo,
+        COALESCE(sa.servicio, 'Ninguno') AS servicio
+    FROM detalles AS d
+    INNER JOIN tipo_cliente    AS tc ON tc.idtc  = d.idtc
+    INNER JOIN estilo_cabello  AS ec ON ec.idec  = d.idec
+    LEFT  JOIN largo_cabello_h AS lh ON lh.idlch = d.idlch
+    LEFT  JOIN largo_cabello_m AS lm ON lm.idlcm = d.idlcm
+    LEFT  JOIN tipo_corte_h    AS ch ON ch.idtch = d.idtch
+    LEFT  JOIN tipo_corte_m    AS cm ON cm.idtcm = d.idtcm
+    LEFT  JOIN flequillo       AS f  ON f.idf    = d.idf
+    LEFT  JOIN servicios_add   AS sa ON sa.ids   = d.ids
+    WHERE d.idac = ?
+    ORDER BY d.idd ASC
+", [$idac]);
 
         return view('citas.carrito')->with('carrito', $carrito);
     }
 
-    // Reporte general con conteo de servicios por cliente
     public function reporte()
     {
         $reporte = \DB::select("
@@ -146,9 +140,41 @@ class citascontroller extends Controller
             INNER JOIN tipo_cliente    AS tc  ON tc.idtc   = d.idtc
             GROUP BY cl.idc, cl.nombre, cl.ap, cl.telefono,
                      fhc.fecha, fhc.hora, tc.tipo_cliente
-            ORDER BY c.idac DESC
+            ORDER BY c.idac ASC
         ");
 
         return view('citas.reporte')->with('reporte', $reporte);
     }
+
+    public function eliminadetalle(Request $request)
+{
+    $idd  = (int) $request->idd;
+    $idac = (int) $request->idac;
+
+    \DB::delete("DELETE FROM detalles WHERE idd = ?", [$idd]);
+
+    $carrito = \DB::select("
+        SELECT
+            d.idd,
+            tc.tipo_cliente                  AS genero,
+            COALESCE(lh.largo,  lm.largo)    AS largo,
+            COALESCE(ch.corte,  cm.corte)    AS corte,
+            COALESCE(f.flequillo, 'N/A')     AS flequillo,
+            ec.estilo,
+            COALESCE(sa.servicio, 'Ninguno') AS servicio
+        FROM detalles AS d
+        INNER JOIN tipo_cliente    AS tc ON tc.idtc  = d.idtc
+        INNER JOIN estilo_cabello  AS ec ON ec.idec  = d.idec
+        LEFT  JOIN largo_cabello_h AS lh ON lh.idlch = d.idlch
+        LEFT  JOIN largo_cabello_m AS lm ON lm.idlcm = d.idlcm
+        LEFT  JOIN tipo_corte_h    AS ch ON ch.idtch = d.idtch
+        LEFT  JOIN tipo_corte_m    AS cm ON cm.idtcm = d.idtcm
+        LEFT  JOIN flequillo       AS f  ON f.idf    = d.idf
+        LEFT  JOIN servicios_add   AS sa ON sa.ids   = d.ids
+        WHERE d.idac = ?
+        ORDER BY d.idd ASC
+    ", [$idac]);
+
+    return view('citas.carrito')->with('carrito', $carrito);
+}
 }
