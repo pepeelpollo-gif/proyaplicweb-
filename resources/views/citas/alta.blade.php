@@ -5,6 +5,24 @@
 <script type="text/javascript">
 $(document).ready(function(){
 
+    // Al seleccionar un cliente existente, rellena los campos
+    $("#select-cliente").change(function(){
+        var val = this.options[this.selectedIndex];
+        if(val.value != ""){
+            $("#idc").val(val.getAttribute('data-idc'));
+            $("#nombre").val(val.getAttribute('data-nombre'));
+            $("#ap").val(val.getAttribute('data-ap'));
+            $("#telefono").val(val.getAttribute('data-telefono'));
+        } else {
+            // Si elige "Nuevo cliente", limpia los campos
+            $("#idc").val("{{ $sigue }}");
+            $("#nombre").val("");
+            $("#ap").val("");
+            $("#telefono").val("");
+        }
+    });
+
+    // Mostrar/ocultar bloques por género
     $("#idtc").change(function(){
         var genero = this.value;
         $("#bloque-hombre, #bloque-mujer").hide();
@@ -35,20 +53,37 @@ $(document).ready(function(){
     <h3>Datos del Cliente</h3>
     <table>
         <tr>
+            <td><label>Cliente existente</label></td>
+            <td>
+                <select id="select-cliente">
+                    <option value="">-- Nuevo cliente --</option>
+                    @foreach($clientes as $cl)
+                        <option value="{{ $cl->idc }}"
+                            data-idc="{{ $cl->idc }}"
+                            data-nombre="{{ $cl->nombre }}"
+                            data-ap="{{ $cl->ap }}"
+                            data-telefono="{{ $cl->telefono }}">
+                            {{ $cl->nombre }} {{ $cl->ap }}
+                        </option>
+                    @endforeach
+                </select>
+            </td>
+        </tr>
+        <tr>
             <td><label>IDC</label></td>
-            <td><input type="text" name="idc" value="{{ $sigue }}" readonly></td>
+            <td><input type="text" name="idc" id="idc" value="{{ $sigue }}" readonly></td>
         </tr>
         <tr>
             <td><label>Nombre</label></td>
-            <td><input type="text" name="nombre"></td>
+            <td><input type="text" name="nombre" id="nombre"></td>
         </tr>
         <tr>
             <td><label>Apellido Paterno</label></td>
-            <td><input type="text" name="ap"></td>
+            <td><input type="text" name="ap" id="ap"></td>
         </tr>
         <tr>
             <td><label>Teléfono</label></td>
-            <td><input type="text" name="telefono" maxlength="15"></td>
+            <td><input type="text" name="telefono" id="telefono" maxlength="15"></td>
         </tr>
         <tr>
             <td><label>Género</label></td>
@@ -82,7 +117,7 @@ $(document).ready(function(){
                     <select name="idlch">
                         <option value="">-- Seleccionar --</option>
                         @foreach($largosh as $l)
-                            <option value="{{ $l->idlch }}">{{ $l->largo }}</option>
+                            <option value="{{ $l->idlcm }}">{{ $l->largo }}</option>
                         @endforeach
                     </select>
                 </td>
@@ -120,7 +155,7 @@ $(document).ready(function(){
                     <select name="idtcm">
                         <option value="">-- Seleccionar --</option>
                         @foreach($cortesm as $c)
-                            <option value="{{ $c->idtcm }}">{{ $c->corte }}</option>
+                            <option value="{{ $c->idtch }}">{{ $c->corte }}</option>
                         @endforeach
                     </select>
                 </td>

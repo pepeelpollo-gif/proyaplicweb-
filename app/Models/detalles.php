@@ -8,5 +8,5 @@ class detalles extends Model
     protected $primaryKey = 'idd';
     public $incrementing = true;
     public $timestamps = false;
-    protected $fillable = ['idd', 'idac', 'idtc', 'idlch', 'idlcm', 'idtch', 'idtcm', 'idf', 'ids', 'idec'];
+    protected $fillable = ['idd', 'idac', 'idtc', 'idlcm', 'idtch', 'idf', 'ids', 'idec'];
 }
