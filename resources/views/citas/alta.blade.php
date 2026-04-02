@@ -2,7 +2,6 @@
 
 @section('contenido')
 
-{{-- Cargar el CSS del módulo --}}
 <link rel="stylesheet" href="{{ asset('css/spa.css') }}">
 
 <script type="text/javascript">
@@ -44,10 +43,9 @@ $(document).ready(function(){
 });
 </script>
 
-{{-- ENCABEZADO --}}
+
 <div class="spa-header">
     <div>
-        <div class="spa-tag">Aura Spa Harmony</div>
         <h1>Agendar <em>Cita</em></h1>
     </div>
 </div>
@@ -237,7 +235,7 @@ $(document).ready(function(){
         </div>
     </div>
 
-    {{-- BOTÓN --}}
+    
     <div class="spa-actions">
         <button type="button" id="btn-agregar" class="spa-btn">
             + Agregar al carrito
@@ -252,6 +250,6 @@ $(document).ready(function(){
     <div id="carrito"></div>
 </div>
 
-</div>{{-- fin spa-container --}}
+</div>
 
 @stop
