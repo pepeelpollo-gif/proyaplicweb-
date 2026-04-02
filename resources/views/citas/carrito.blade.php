@@ -1,30 +1,42 @@
-<table border="1">
-    <tr>
-        <td>Género</td>
-        <td>Largo</td>
-        <td>Tipo Corte</td>
-        <td>Flequillo</td>
-        <td>Estilo</td>
-        <td>Servicio Add.</td>
-        <td>Eliminar</td>
-    </tr>
-    @foreach($carrito as $item)
-    <tr>
-        <td>{{ $item->genero }}</td>
-        <td>{{ $item->largo }}</td>
-        <td>{{ $item->corte }}</td>
-        <td>{{ $item->flequillo }}</td>
-        <td>{{ $item->estilo }}</td>
-        <td>{{ $item->servicio }}</td>
-        <td>
-            <button onclick="
-                $('#carrito').load(
-                    '{{ url('eliminadetalle') }}' +
-                    '?idd={{ $item->idd }}&idac={{ $item->idac }}'
-                ); return false;">
-                Eliminar
-            </button>
-        </td>
-    </tr>
-    @endforeach
-</table>
+<div class="spa-carrito-wrapper">
+    <table class="spa-carrito-table">
+        <thead>
+            <tr>
+                <th>Género</th>
+                <th>Largo</th>
+                <th>Corte</th>
+                <th>Flequillo</th>
+                <th>Estilo</th>
+                <th>Servicio Add.</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($carrito as $item)
+            <tr>
+                <td>{{ $item->genero }}</td>
+                <td>{{ $item->largo }}</td>
+                <td>{{ $item->corte }}</td>
+                <td>{{ $item->flequillo }}</td>
+                <td>{{ $item->estilo }}</td>
+                <td>{{ $item->servicio }}</td>
+                <td>
+                    <button class="spa-btn-del" onclick="
+                        $('#carrito').load(
+                            '{{ url('eliminadetalle') }}' +
+                            '?idd={{ $item->idd }}&idac={{ $item->idac }}'
+                        ); return false;">
+                        Eliminar
+                    </button>
+                </td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="7" style="text-align:center; padding:20px; color:var(--gris-med); font-style:italic; font-size:13px;">
+                    El carrito está vacío.
+                </td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>

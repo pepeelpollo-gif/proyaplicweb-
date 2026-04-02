@@ -2,19 +2,21 @@
 
 @section('contenido')
 
+{{-- Cargar el CSS del módulo --}}
+<link rel="stylesheet" href="{{ asset('css/spa.css') }}">
+
 <script type="text/javascript">
 $(document).ready(function(){
 
-    // Al seleccionar un cliente existente, rellena los campos
+    // Seleccionar cliente existente → rellenar campos
     $("#select-cliente").change(function(){
-        var val = this.options[this.selectedIndex];
-        if(val.value != ""){
-            $("#idc").val(val.getAttribute('data-idc'));
-            $("#nombre").val(val.getAttribute('data-nombre'));
-            $("#ap").val(val.getAttribute('data-ap'));
-            $("#telefono").val(val.getAttribute('data-telefono'));
+        var opt = this.options[this.selectedIndex];
+        if(opt.value != ""){
+            $("#idc").val(opt.getAttribute('data-idc'));
+            $("#nombre").val(opt.getAttribute('data-nombre'));
+            $("#ap").val(opt.getAttribute('data-ap'));
+            $("#telefono").val(opt.getAttribute('data-telefono'));
         } else {
-            // Si elige "Nuevo cliente", limpia los campos
             $("#idc").val("{{ $sigue }}");
             $("#nombre").val("");
             $("#ap").val("");
@@ -24,15 +26,12 @@ $(document).ready(function(){
 
     // Mostrar/ocultar bloques por género
     $("#idtc").change(function(){
-        var genero = this.value;
-        $("#bloque-hombre, #bloque-mujer").hide();
-        $("#bloque-servicios-h, #bloque-servicios-m").hide();
-        if(genero == 1){
-            $("#bloque-hombre").show();
-            $("#bloque-servicios-h").show();
-        } else if(genero == 2){
-            $("#bloque-mujer").show();
-            $("#bloque-servicios-m").show();
+        var g = this.value;
+        $("#bloque-hombre, #bloque-mujer, #bloque-servicios-h, #bloque-servicios-m").addClass('spa-hidden');
+        if(g == 1){
+            $("#bloque-hombre, #bloque-servicios-h").removeClass('spa-hidden');
+        } else if(g == 2){
+            $("#bloque-mujer, #bloque-servicios-m").removeClass('spa-hidden');
         }
     });
 
@@ -45,18 +44,26 @@ $(document).ready(function(){
 });
 </script>
 
-<h1>Agendar Cita</h1>
-<br>
+{{-- ENCABEZADO --}}
+<div class="spa-header">
+    <div>
+        <div class="spa-tag">Aura Spa Harmony</div>
+        <h1>Agendar <em>Cita</em></h1>
+    </div>
+</div>
 
+<div class="spa-container">
 <form id="form-cita">
 
-    <h3>Datos del Cliente</h3>
-    <table>
-        <tr>
-            <td><label>Cliente existente</label></td>
-            <td>
-                <select id="select-cliente">
-                    <option value="">-- Nuevo cliente --</option>
+    {{-- SECCIÓN: Datos del Cliente --}}
+    <div class="spa-section">
+        <div class="spa-section-label">Datos del Cliente</div>
+
+        <div class="spa-grid cols-1" style="margin-bottom:16px;">
+            <div class="spa-field">
+                <label class="spa-label">Buscar cliente registrado</label>
+                <select id="select-cliente" class="spa-select">
+                    <option value="">— Nuevo cliente —</option>
                     @foreach($clientes as $cl)
                         <option value="{{ $cl->idc }}"
                             data-idc="{{ $cl->idc }}"
@@ -67,159 +74,184 @@ $(document).ready(function(){
                         </option>
                     @endforeach
                 </select>
-            </td>
-        </tr>
-        <tr>
-            <td><label>IDC</label></td>
-            <td><input type="text" name="idc" id="idc" value="{{ $sigue }}" readonly></td>
-        </tr>
-        <tr>
-            <td><label>Nombre</label></td>
-            <td><input type="text" name="nombre" id="nombre"></td>
-        </tr>
-        <tr>
-            <td><label>Apellido Paterno</label></td>
-            <td><input type="text" name="ap" id="ap"></td>
-        </tr>
-        <tr>
-            <td><label>Teléfono</label></td>
-            <td><input type="text" name="telefono" id="telefono" maxlength="15"></td>
-        </tr>
-        <tr>
-            <td><label>Género</label></td>
-            <td>
-                <select name="idtc" id="idtc">
-                    <option value="">-- Seleccionar --</option>
+            </div>
+        </div>
+
+        <div class="spa-grid">
+            <div class="spa-field">
+                <label class="spa-label">IDC</label>
+                <input type="text" name="idc" id="idc" class="spa-input" value="{{ $sigue }}" readonly>
+            </div>
+            <div class="spa-field">
+                <label class="spa-label">Teléfono</label>
+                <input type="text" name="telefono" id="telefono" class="spa-input" maxlength="15">
+            </div>
+            <div class="spa-field">
+                <label class="spa-label">Nombre</label>
+                <input type="text" name="nombre" id="nombre" class="spa-input">
+            </div>
+            <div class="spa-field">
+                <label class="spa-label">Apellido Paterno</label>
+                <input type="text" name="ap" id="ap" class="spa-input">
+            </div>
+        </div>
+    </div>
+
+    {{-- SECCIÓN: Detalles de la Cita --}}
+    <div class="spa-section">
+        <div class="spa-section-label">Detalles de la Cita</div>
+
+        <div class="spa-grid cols-3">
+            <div class="spa-field">
+                <label class="spa-label">Género</label>
+                <select name="idtc" id="idtc" class="spa-select">
+                    <option value="">— Seleccionar —</option>
                     @foreach($tiposcliente as $t)
                         <option value="{{ $t->idtc }}">{{ $t->tipo_cliente }}</option>
                     @endforeach
                 </select>
-            </td>
-        </tr>
-        <tr>
-            <td><label>Fecha de Cita</label></td>
-            <td><input type="date" name="fecha"></td>
-        </tr>
-        <tr>
-            <td><label>Hora de Inicio</label></td>
-            <td><input type="time" name="hora"></td>
-        </tr>
-    </table>
-
-    <hr>
-    <h3>Servicio de Cabello</h3>
-
-    <div id="bloque-hombre" style="display:none;">
-        <table>
-            <tr>
-                <td><label>Largo del Cabello</label></td>
-                <td>
-                    <select name="idlch">
-                        <option value="">-- Seleccionar --</option>
-                        @foreach($largosh as $l)
-                            <option value="{{ $l->idlcm }}">{{ $l->largo }}</option>
-                        @endforeach
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td><label>Tipo de Corte</label></td>
-                <td>
-                    <select name="idtch">
-                        <option value="">-- Seleccionar --</option>
-                        @foreach($cortesh as $c)
-                            <option value="{{ $c->idtch }}">{{ $c->corte }}</option>
-                        @endforeach
-                    </select>
-                </td>
-            </tr>
-        </table>
+            </div>
+            <div class="spa-field">
+                <label class="spa-label">Fecha</label>
+                <input type="date" name="fecha" class="spa-input">
+            </div>
+            <div class="spa-field">
+                <label class="spa-label">Hora</label>
+                <input type="time" name="hora" class="spa-input">
+            </div>
+        </div>
     </div>
 
-    <div id="bloque-mujer" style="display:none;">
-        <table>
-            <tr>
-                <td><label>Largo del Cabello</label></td>
-                <td>
-                    <select name="idlcm">
-                        <option value="">-- Seleccionar --</option>
-                        @foreach($largosm as $l)
-                            <option value="{{ $l->idlcm }}">{{ $l->largo }}</option>
-                        @endforeach
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td><label>Tipo de Corte</label></td>
-                <td>
-                    <select name="idtcm">
-                        <option value="">-- Seleccionar --</option>
-                        @foreach($cortesm as $c)
-                            <option value="{{ $c->idtch }}">{{ $c->corte }}</option>
-                        @endforeach
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td><label>Flequillo</label></td>
-                <td>
-                    <select name="idf">
-                        <option value="">Sin flequillo</option>
-                        @foreach($flequillos as $f)
-                            <option value="{{ $f->idf }}">{{ $f->flequillo }}</option>
-                        @endforeach
-                    </select>
-                </td>
-            </tr>
-        </table>
-    </div>
-
-    <table>
-        <tr>
-            <td><label>Estilo de Cabello</label></td>
-            <td>
-                <select name="idec">
-                    <option value="">-- Seleccionar --</option>
+    {{-- SECCIÓN: Servicio (Hombre) --}}
+    <div id="bloque-hombre" class="spa-section spa-hidden">
+        <div class="spa-section-label">Servicio — Hombre</div>
+        <div class="spa-grid">
+            <div class="spa-field">
+                <label class="spa-label">Largo del Cabello</label>
+                <select name="idlch" class="spa-select">
+                    <option value="">— Seleccionar —</option>
+                    @foreach($largosh as $l)
+                        <option value="{{ $l->idlcm }}">{{ $l->largo }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="spa-field">
+                <label class="spa-label">Tipo de Corte</label>
+                <select name="idtch" class="spa-select">
+                    <option value="">— Seleccionar —</option>
+                    @foreach($cortesh as $c)
+                        <option value="{{ $c->idtch }}">{{ $c->corte }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="spa-field">
+                <label class="spa-label">Estilo</label>
+                <select name="idec" class="spa-select">
+                    <option value="">— Seleccionar —</option>
                     @foreach($estilos as $e)
                         <option value="{{ $e->idec }}">{{ $e->estilo }}</option>
                     @endforeach
                 </select>
-            </td>
-        </tr>
-    </table>
+            </div>
+        </div>
+    </div>
 
-    <hr>
-    <h3>Servicios Adicionales</h3>
+    {{-- SECCIÓN: Servicio (Mujer) --}}
+    <div id="bloque-mujer" class="spa-section spa-hidden">
+        <div class="spa-section-label">Servicio — Mujer</div>
+        <div class="spa-grid">
+            <div class="spa-field">
+                <label class="spa-label">Largo del Cabello</label>
+                <select name="idlcm" class="spa-select">
+                    <option value="">— Seleccionar —</option>
+                    @foreach($largosm as $l)
+                        <option value="{{ $l->idlcm }}">{{ $l->largo }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="spa-field">
+                <label class="spa-label">Tipo de Corte</label>
+                <select name="idtcm" class="spa-select">
+                    <option value="">— Seleccionar —</option>
+                    @foreach($cortesm as $c)
+                        <option value="{{ $c->idtch }}">{{ $c->corte }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="spa-field">
+                <label class="spa-label">Flequillo</label>
+                <select name="idf" class="spa-select">
+                    <option value="">Sin flequillo</option>
+                    @foreach($flequillos as $f)
+                        <option value="{{ $f->idf }}">{{ $f->flequillo }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="spa-field">
+                <label class="spa-label">Estilo</label>
+                <select name="idec" class="spa-select">
+                    <option value="">— Seleccionar —</option>
+                    @foreach($estilos as $e)
+                        <option value="{{ $e->idec }}">{{ $e->estilo }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+    </div>
 
-    <div id="bloque-servicios-h" style="display:none;">
-        <table>
+    {{-- SECCIÓN: Servicios Adicionales (Hombre) --}}
+    <div id="bloque-servicios-h" class="spa-section spa-hidden">
+        <div class="spa-section-label">Servicios Adicionales</div>
+        <div class="spa-radio-group">
             @foreach($servicios as $s)
                 @if($s->ids != 4)
-                <tr><td><label><input type="radio" name="ids" value="{{ $s->ids }}"> {{ $s->servicio }}</label></td></tr>
+                <label class="spa-radio-option">
+                    <input type="radio" name="ids" value="{{ $s->ids }}">
+                    {{ $s->servicio }}
+                </label>
                 @endif
             @endforeach
-            <tr><td><label><input type="radio" name="ids" value="" checked> Ninguno</label></td></tr>
-        </table>
+            <label class="spa-radio-option">
+                <input type="radio" name="ids" value="" checked>
+                Ninguno
+            </label>
+        </div>
     </div>
 
-    <div id="bloque-servicios-m" style="display:none;">
-        <table>
+    {{-- SECCIÓN: Servicios Adicionales (Mujer) --}}
+    <div id="bloque-servicios-m" class="spa-section spa-hidden">
+        <div class="spa-section-label">Servicios Adicionales</div>
+        <div class="spa-radio-group">
             @foreach($servicios as $s)
                 @if($s->ids != 3)
-                <tr><td><label><input type="radio" name="ids" value="{{ $s->ids }}"> {{ $s->servicio }}</label></td></tr>
+                <label class="spa-radio-option">
+                    <input type="radio" name="ids" value="{{ $s->ids }}">
+                    {{ $s->servicio }}
+                </label>
                 @endif
             @endforeach
-            <tr><td><label><input type="radio" name="ids" value="" checked> Ninguno</label></td></tr>
-        </table>
+            <label class="spa-radio-option">
+                <input type="radio" name="ids" value="" checked>
+                Ninguno
+            </label>
+        </div>
     </div>
 
-    <br>
-    <input type="button" id="btn-agregar" value="Agregar al Carrito">
+    {{-- BOTÓN --}}
+    <div class="spa-actions">
+        <button type="button" id="btn-agregar" class="spa-btn">
+            + Agregar al carrito
+        </button>
+    </div>
 
 </form>
 
-<hr>
-<h2>Carrito</h2>
-<div id="carrito"></div>
+{{-- CARRITO --}}
+<div style="margin-top:32px;">
+    <div class="spa-section-label" style="margin-bottom:12px;">Carrito de servicios</div>
+    <div id="carrito"></div>
+</div>
+
+</div>{{-- fin spa-container --}}
 
 @stop
