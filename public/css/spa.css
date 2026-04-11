@@ -1,3 +1,7 @@
+/* =============================================
+   AURA SPA — Módulo de Control de Citas
+   ============================================= */
+
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap');
 
 /* === VARIABLES === */
@@ -11,8 +15,8 @@
     --acento-clr:#c4a882;
     --error:     #c0392b;
     --success:   #5a7a5a;
-    --radio: 4px;
-    --sombra: 0 2px 12px rgba(30,30,30,0.07);
+    --radio:     4px;
+    --sombra:    0 2px 12px rgba(30,30,30,0.07);
 }
 
 /* === BASE === */
@@ -217,11 +221,14 @@ body {
     letter-spacing: 0.5px;
     cursor: pointer;
     transition: background 0.2s, transform 0.1s;
+    text-decoration: none;
 }
 
 .spa-btn:hover {
     background: var(--acento);
     transform: translateY(-1px);
+    color: var(--blanco);
+    text-decoration: none;
 }
 
 .spa-btn:active {
@@ -237,9 +244,10 @@ body {
 .spa-btn-outline:hover {
     background: var(--gris-clr);
     transform: none;
+    color: var(--carbon);
 }
 
-/* === BLOQUE OCULTO (hombre/mujer) === */
+/* === BLOQUE OCULTO === */
 .spa-hidden {
     display: none;
 }
@@ -292,23 +300,72 @@ body {
     color: var(--carbon);
 }
 
-/* Botón eliminar del carrito */
-.spa-btn-del {
+/* === BOTÓN X (eliminar carrito) === */
+.spa-btn-x {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
     background: none;
-    border: 1px solid #ddd;
-    border-radius: 3px;
-    padding: 4px 10px;
-    font-size: 11px;
-    color: var(--error);
+    border: none;
     cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    transition: all 0.15s;
+    position: relative;
+    padding: 0;
+    border-radius: 50%;
+    transition: background 0.15s;
 }
 
-.spa-btn-del:hover {
+.spa-btn-x::before,
+.spa-btn-x::after {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 2px;
     background: var(--error);
-    color: white;
-    border-color: var(--error);
+    border-radius: 2px;
+    transition: transform 0.2s, width 0.2s;
+}
+
+.spa-btn-x::before { transform: rotate(45deg); }
+.spa-btn-x::after  { transform: rotate(-45deg); }
+
+.spa-btn-x:hover {
+    background: rgba(192, 57, 43, 0.1);
+}
+
+.spa-btn-x:hover::before {
+    transform: rotate(45deg) scale(1.2);
+}
+
+.spa-btn-x:hover::after {
+    transform: rotate(-45deg) scale(1.2);
+}
+
+/* === BOTÓN LÁPIZ (modificar) === */
+.spa-btn-edit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    background: none;
+    border: 1px solid var(--gris-clr);
+    border-radius: 50%;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.18s;
+    text-decoration: none;
+    color: var(--acento);
+    font-size: 14px;
+}
+
+.spa-btn-edit:hover {
+    background: var(--acento);
+    border-color: var(--acento);
+    color: var(--blanco);
+    transform: rotate(-8deg) scale(1.1);
+    text-decoration: none;
 }
 
 /* === REPORTE === */
@@ -369,7 +426,7 @@ body {
     color: var(--acento);
 }
 
-/* === ACCIONES FLOTANTES === */
+/* === ACCIONES === */
 .spa-actions {
     display: flex;
     align-items: center;
@@ -377,7 +434,7 @@ body {
     padding: 20px 0 0;
 }
 
-/* === NAVBAR OVERRIDE === */
+/* === NAVBAR === */
 .navbar {
     font-family: 'DM Sans', sans-serif !important;
     font-size: 14px;

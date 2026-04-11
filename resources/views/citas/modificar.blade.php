@@ -7,35 +7,21 @@
 <script type="text/javascript">
 $(document).ready(function(){
 
-    $("#select-cliente").change(function(){
-        var opt = this.options[this.selectedIndex];
-        if(opt.value != ""){
-            $("#idc").val(opt.getAttribute('data-idc'));
-            $("#nombre").val(opt.getAttribute('data-nombre'));
-            $("#ap").val(opt.getAttribute('data-ap'));
-            $("#telefono").val(opt.getAttribute('data-telefono'));
-        } else {
-            $("#idc").val("{{ $sigue }}");
-            $("#nombre").val("");
-            $("#ap").val("");
-            $("#telefono").val("");
-        }
-    });
-
-    $("#idtc").change(function(){
-        var g = this.value;
+    // Mostrar/ocultar bloques por género según valor actual
+    function mostrarGenero(g){
         $("#bloque-hombre, #bloque-mujer, #bloque-servicios-h, #bloque-servicios-m").addClass('spa-hidden');
         if(g == 1){
             $("#bloque-hombre, #bloque-servicios-h").removeClass('spa-hidden');
         } else if(g == 2){
             $("#bloque-mujer, #bloque-servicios-m").removeClass('spa-hidden');
         }
-    });
+    }
 
-    $("#btn-agregar").click(function(){
-        $("#carrito").load(
-            '{{ url("cargacarritocitas") }}' + '?' + $("#form-cita").serialize()
-        );
+    // Ejecutar al cargar con el valor actual
+    mostrarGenero($("#idtc").val());
+
+    $("#idtc").change(function(){
+        mostrarGenero(this.value);
     });
 
 });
@@ -44,80 +30,65 @@ $(document).ready(function(){
 <div class="spa-header">
     <div>
         <div class="spa-tag">Aura Spa Harmony</div>
-        <h1>Agendar <em>Cita</em></h1>
+        <h1>Modificar <em>Cita</em></h1>
     </div>
     <div style="margin-left:auto;">
         <a href="{{ route('reportecitas') }}" class="spa-btn spa-btn-outline" style="text-decoration:none; font-size:13px;">
-            Ver reporte
+            ← Volver al reporte
         </a>
     </div>
 </div>
 
 <div class="spa-container">
-<form id="form-cita">
+<form action="{{ route('guardamodifica') }}" method="POST">
+    @csrf
 
-    {{-- CLIENTE --}}
+    <input type="hidden" name="idac" value="{{ $cita->idac }}">
+
+    {{-- CLIENTE (solo lectura, no se modifica el cliente) --}}
     <div class="spa-section">
         <div class="spa-section-label">Datos del Cliente</div>
-
-        <div class="spa-grid cols-1" style="margin-bottom:16px;">
-            <div class="spa-field">
-                <label class="spa-label">Buscar cliente registrado</label>
-                <select id="select-cliente" class="spa-select">
-                    <option value="">— Nuevo cliente —</option>
-                    @foreach($clientes as $cl)
-                        <option value="{{ $cl->idc }}"
-                            data-idc="{{ $cl->idc }}"
-                            data-nombre="{{ $cl->nombre }}"
-                            data-ap="{{ $cl->ap }}"
-                            data-telefono="{{ $cl->telefono }}">
-                            {{ $cl->nombre }} {{ $cl->ap }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-        </div>
-
         <div class="spa-grid">
             <div class="spa-field">
                 <label class="spa-label">IDC</label>
-                <input type="text" name="idc" id="idc" class="spa-input" value="{{ $sigue }}" readonly>
+                <input type="text" class="spa-input" value="{{ $cita->idc }}" readonly>
             </div>
             <div class="spa-field">
                 <label class="spa-label">Teléfono</label>
-                <input type="text" name="telefono" id="telefono" class="spa-input" maxlength="15">
+                <input type="text" class="spa-input" value="{{ $cita->telefono }}" readonly>
             </div>
             <div class="spa-field">
                 <label class="spa-label">Nombre</label>
-                <input type="text" name="nombre" id="nombre" class="spa-input">
+                <input type="text" class="spa-input" value="{{ $cita->nombre }}" readonly>
             </div>
             <div class="spa-field">
                 <label class="spa-label">Apellido Paterno</label>
-                <input type="text" name="ap" id="ap" class="spa-input">
+                <input type="text" class="spa-input" value="{{ $cita->ap }}" readonly>
             </div>
         </div>
     </div>
 
-    {{-- CITA --}}
+    {{-- DETALLES DE LA CITA --}}
     <div class="spa-section">
         <div class="spa-section-label">Detalles de la Cita</div>
         <div class="spa-grid cols-3">
             <div class="spa-field">
                 <label class="spa-label">Género</label>
                 <select name="idtc" id="idtc" class="spa-select">
-                    <option value="">— Seleccionar —</option>
                     @foreach($tiposcliente as $t)
-                        <option value="{{ $t->idtc }}">{{ $t->tipo_cliente }}</option>
+                        <option value="{{ $t->idtc }}" {{ $t->idtc == $cita->idtc ? 'selected' : '' }}>
+                            {{ $t->tipo_cliente }}
+                        </option>
                     @endforeach
                 </select>
             </div>
             <div class="spa-field">
                 <label class="spa-label">Fecha</label>
-                <input type="date" name="fecha" class="spa-input">
+                <input type="date" name="fecha" class="spa-input" value="{{ $cita->fecha }}">
             </div>
             <div class="spa-field">
                 <label class="spa-label">Hora</label>
-                <input type="time" name="hora" class="spa-input">
+                <input type="time" name="hora" class="spa-input" value="{{ $cita->hora }}">
             </div>
         </div>
     </div>
@@ -131,7 +102,9 @@ $(document).ready(function(){
                 <select name="idlch" class="spa-select">
                     <option value="">— Seleccionar —</option>
                     @foreach($largosh as $l)
-                        <option value="{{ $l->idlcm }}">{{ $l->largo }}</option>
+                        <option value="{{ $l->idlcm }}" {{ $detalle && $detalle->idlcm == $l->idlcm ? 'selected' : '' }}>
+                            {{ $l->largo }}
+                        </option>
                     @endforeach
                 </select>
             </div>
@@ -140,7 +113,9 @@ $(document).ready(function(){
                 <select name="idtch" class="spa-select">
                     <option value="">— Seleccionar —</option>
                     @foreach($cortesh as $c)
-                        <option value="{{ $c->idtch }}">{{ $c->corte }}</option>
+                        <option value="{{ $c->idtch }}" {{ $detalle && $detalle->idtch == $c->idtch ? 'selected' : '' }}>
+                            {{ $c->corte }}
+                        </option>
                     @endforeach
                 </select>
             </div>
@@ -149,7 +124,9 @@ $(document).ready(function(){
                 <select name="idec" class="spa-select">
                     <option value="">— Seleccionar —</option>
                     @foreach($estilos as $e)
-                        <option value="{{ $e->idec }}">{{ $e->estilo }}</option>
+                        <option value="{{ $e->idec }}" {{ $detalle && $detalle->idec == $e->idec ? 'selected' : '' }}>
+                            {{ $e->estilo }}
+                        </option>
                     @endforeach
                 </select>
             </div>
@@ -165,7 +142,9 @@ $(document).ready(function(){
                 <select name="idlcm" class="spa-select">
                     <option value="">— Seleccionar —</option>
                     @foreach($largosm as $l)
-                        <option value="{{ $l->idlcm }}">{{ $l->largo }}</option>
+                        <option value="{{ $l->idlcm }}" {{ $detalle && $detalle->idlcm == $l->idlcm ? 'selected' : '' }}>
+                            {{ $l->largo }}
+                        </option>
                     @endforeach
                 </select>
             </div>
@@ -174,7 +153,9 @@ $(document).ready(function(){
                 <select name="idtcm" class="spa-select">
                     <option value="">— Seleccionar —</option>
                     @foreach($cortesm as $c)
-                        <option value="{{ $c->idtch }}">{{ $c->corte }}</option>
+                        <option value="{{ $c->idtch }}" {{ $detalle && $detalle->idtch == $c->idtch ? 'selected' : '' }}>
+                            {{ $c->corte }}
+                        </option>
                     @endforeach
                 </select>
             </div>
@@ -183,7 +164,9 @@ $(document).ready(function(){
                 <select name="idf" class="spa-select">
                     <option value="">Sin flequillo</option>
                     @foreach($flequillos as $f)
-                        <option value="{{ $f->idf }}">{{ $f->flequillo }}</option>
+                        <option value="{{ $f->idf }}" {{ $detalle && $detalle->idf == $f->idf ? 'selected' : '' }}>
+                            {{ $f->flequillo }}
+                        </option>
                     @endforeach
                 </select>
             </div>
@@ -192,7 +175,9 @@ $(document).ready(function(){
                 <select name="idec" class="spa-select">
                     <option value="">— Seleccionar —</option>
                     @foreach($estilos as $e)
-                        <option value="{{ $e->idec }}">{{ $e->estilo }}</option>
+                        <option value="{{ $e->idec }}" {{ $detalle && $detalle->idec == $e->idec ? 'selected' : '' }}>
+                            {{ $e->estilo }}
+                        </option>
                     @endforeach
                 </select>
             </div>
@@ -206,13 +191,15 @@ $(document).ready(function(){
             @foreach($servicios as $s)
                 @if($s->ids != 4)
                 <label class="spa-radio-option">
-                    <input type="radio" name="ids" value="{{ $s->ids }}">
+                    <input type="radio" name="ids" value="{{ $s->ids }}"
+                        {{ $detalle && $detalle->ids == $s->ids ? 'checked' : '' }}>
                     {{ $s->servicio }}
                 </label>
                 @endif
             @endforeach
             <label class="spa-radio-option">
-                <input type="radio" name="ids" value="" checked> Ninguno
+                <input type="radio" name="ids" value=""
+                    {{ !$detalle || !$detalle->ids ? 'checked' : '' }}> Ninguno
             </label>
         </div>
     </div>
@@ -224,29 +211,25 @@ $(document).ready(function(){
             @foreach($servicios as $s)
                 @if($s->ids != 3)
                 <label class="spa-radio-option">
-                    <input type="radio" name="ids" value="{{ $s->ids }}">
+                    <input type="radio" name="ids" value="{{ $s->ids }}"
+                        {{ $detalle && $detalle->ids == $s->ids ? 'checked' : '' }}>
                     {{ $s->servicio }}
                 </label>
                 @endif
             @endforeach
             <label class="spa-radio-option">
-                <input type="radio" name="ids" value="" checked> Ninguno
+                <input type="radio" name="ids" value=""
+                    {{ !$detalle || !$detalle->ids ? 'checked' : '' }}> Ninguno
             </label>
         </div>
     </div>
 
     <div class="spa-actions">
-        <button type="button" id="btn-agregar" class="spa-btn">+ Agregar al carrito</button>
+        <button type="submit" class="spa-btn">Guardar cambios</button>
+        <a href="{{ route('reportecitas') }}" class="spa-btn spa-btn-outline" style="text-decoration:none;">Cancelar</a>
     </div>
 
 </form>
-
-{{-- CARRITO --}}
-<div style="margin-top:32px;">
-    <div class="spa-section-label" style="margin-bottom:12px;">Carrito de servicios</div>
-    <div id="carrito"></div>
 </div>
 
-
-</div>
 @stop

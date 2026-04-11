@@ -4,7 +4,6 @@
 
 <link rel="stylesheet" href="{{ asset('css/spa.css') }}">
 
-{{-- ENCABEZADO --}}
 <div class="spa-header">
     <div>
         <div class="spa-tag">Aura Spa Harmony</div>
@@ -31,6 +30,7 @@
                     <th>Hora</th>
                     <th>Género</th>
                     <th>Servicios</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -50,10 +50,17 @@
                         @endif
                     </td>
                     <td class="spa-num">{{ $r->num_servicios }}</td>
+                    <td style="text-align:center;">
+                        <a href="{{ route('modificacita', ['idac' => $r->idac]) }}"
+                           class="spa-btn-edit"
+                           title="Modificar cita">
+                            ✏
+                        </a>
+                    </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="8" style="text-align:center; padding:32px; color:var(--gris-med); font-style:italic;">
+                    <td colspan="9" style="text-align:center; padding:32px; color:var(--gris-med); font-style:italic;">
                         No hay citas registradas aún.
                     </td>
                 </tr>
@@ -62,7 +69,6 @@
         </table>
     </div>
 
-    {{-- Pie de tabla --}}
     <div style="display:flex; justify-content:space-between; align-items:center; padding-top:12px;">
         <span style="font-size:12px; color:var(--gris-med);">
             {{ count($reporte) }} cita{{ count($reporte) != 1 ? 's' : '' }} registrada{{ count($reporte) != 1 ? 's' : '' }}

@@ -20,19 +20,18 @@
                 <td>{{ $item->flequillo }}</td>
                 <td>{{ $item->estilo }}</td>
                 <td>{{ $item->servicio }}</td>
-                <td>
-                    <button class="spa-btn-del" onclick="
+                <td style="text-align:center;">
+                    <button class="spa-btn-x" title="Eliminar" onclick="
                         $('#carrito').load(
                             '{{ url('eliminadetalle') }}' +
                             '?idd={{ $item->idd }}&idac={{ $item->idac }}'
                         ); return false;">
-                        Eliminar
                     </button>
                 </td>
             </tr>
             @empty
             <tr>
-                <td colspan="7" style="text-align:center; padding:20px; color:var(--gris-med); font-style:italic; font-size:13px;">
+                <td colspan="7" style="text-align:center; padding:24px; color:var(--gris-med); font-style:italic; font-size:13px;">
                     El carrito está vacío.
                 </td>
             </tr>

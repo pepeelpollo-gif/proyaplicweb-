@@ -26,6 +26,16 @@ Route::get('editaempleado',[empleadoscontroller::class,'editaempleado'])->name('
 Route::post('actualizaemp',[empleadoscontroller::class,'actualizaemp'])->name('actualizaemp');
 
 
+// --- Rutas de Citas (reemplaza las anteriores) ---
+Route::get('altacita',          [citascontroller::class, 'altacita'])->name('altacita');
+Route::get('cargacarritocitas', [citascontroller::class, 'cargacarrito'])->name('cargacarritocitas');
+Route::get('reportecitas',      [citascontroller::class, 'reporte'])->name('reportecitas');
+Route::get('eliminadetalle',    [citascontroller::class, 'eliminadetalle'])->name('eliminadetalle');
+Route::get('modificacita',      [citascontroller::class, 'modificacita'])->name('modificacita');
+Route::post('guardamodifica',   [citascontroller::class, 'guardamodifica'])->name('guardamodifica');
+
+
+
 // 1. Ruta para ver el reporte (apunta a 'index')
 Route::get(uri: 'reportejaime', action: [examenjaimecontroller::class, 'index'])->name('reporte.jaime');
 
