@@ -439,3 +439,55 @@ body {
     font-family: 'DM Sans', sans-serif !important;
     font-size: 14px;
 }
+
+
+/* ── Input en estado de error ──────────────────── */
+.spa-input-error {
+    border-color: var(--error) !important;
+    background-color: rgba(192, 57, 43, 0.04) !important;
+    box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.10) !important;
+}
+
+/* ── Mensaje de error bajo el campo ───────────── */
+.spa-error-msg {
+    font-size: 11.5px;
+    color: var(--error);
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.spa-error-msg::before {
+    content: '⚠';
+    font-size: 11px;
+}
+
+/* ── Mensaje de tabla vacía ────────────────────── */
+.spa-sin-servicios {
+    background: var(--blanco);
+    border: 1px solid var(--gris-clr);
+    border-radius: 8px;
+    padding: 24px;
+    text-align: center;
+    color: var(--gris-med);
+    font-style: italic;
+    font-size: 13px;
+}
+
+/* ── Animación al eliminar una fila ───────────── */
+.spa-fila-eliminando {
+    background-color: rgba(192, 57, 43, 0.06) !important;
+    opacity: 0;
+    transform: translateX(12px);
+    transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.1s;
+}
+
+/* ── Columna Acciones en tabla de modificar ───── */
+#tabla-servicios-mod th:last-child,
+#tabla-servicios-mod td:last-child {
+    width: 60px;
+    text-align: center;
+}

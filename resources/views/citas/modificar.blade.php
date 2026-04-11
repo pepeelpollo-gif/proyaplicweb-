@@ -7,6 +7,9 @@
 <script type="text/javascript">
 $(document).ready(function(){
 
+    /* ─────────────────────────────────────────────
+       MOSTRAR / OCULTAR BLOQUES POR GÉNERO
+       ───────────────────────────────────────────── */
     function mostrarGenero(g){
         $("#bloque-hombre, #bloque-mujer, #bloque-servicios-h, #bloque-servicios-m").addClass('spa-hidden');
         if(g == 1){
@@ -20,6 +23,57 @@ $(document).ready(function(){
 
     $("#idtc").change(function(){
         mostrarGenero(this.value);
+    });
+
+    /* ─────────────────────────────────────────────
+       handleDeleteService — ELIMINAR SERVICIO DE LA TABLA
+       Al dar clic en el botón X de cualquier fila:
+         1. Muestra confirmación rápida.
+         2. Elimina la fila del DOM (vista inmediata).
+         3. Hace AJAX al servidor para eliminar el registro en BD.
+         4. Actualiza el contador de servicios.
+         5. Si quedan 0 servicios, muestra el mensaje vacío.
+       ───────────────────────────────────────────── */
+    $(document).on("click", ".btn-eliminar-servicio", function(){
+        var $btn  = $(this);
+        var idd   = $btn.data("idd");
+        var idac  = $btn.data("idac");
+        var $fila = $btn.closest("tr");
+
+        // Feedback visual inmediato
+        $fila.addClass("spa-fila-eliminando");
+
+        setTimeout(function(){
+            // Eliminar del DOM
+            $fila.remove();
+
+            // Actualizar contador
+            var total = $("#tabla-servicios-mod tbody tr").length;
+            $("#contador-servicios").text(
+                total + " servicio" + (total !== 1 ? "s" : "")
+            );
+
+            // Si no quedan filas, mostrar mensaje vacío
+            if (total === 0) {
+                $("#tabla-servicios-mod").closest(".spa-carrito-wrapper").replaceWith(
+                    '<div id="msg-sin-servicios" class="spa-sin-servicios">' +
+                    'Esta cita no tiene servicios registrados aún.' +
+                    '</div>'
+                );
+            }
+
+            // Llamada AJAX al servidor para eliminar en BD
+            $.ajax({
+                url: '{{ url("eliminadetalle") }}',
+                method: 'GET',
+                data: { idd: idd, idac: idac },
+                error: function(){
+                    // Si falla el servidor, mostrar aviso sin bloquear la UI
+                    console.warn("No se pudo eliminar el detalle idd=" + idd + " del servidor.");
+                }
+            });
+
+        }, 220); // Pequeña espera para que se vea la animación de fade
     });
 
 });
@@ -236,7 +290,7 @@ $(document).ready(function(){
         <div class="spa-section-label" style="margin-bottom:0; flex:1;">
             Servicios registrados en esta cita
         </div>
-        <span style="
+        <span id="contador-servicios" style="
             background: var(--carbon);
             color: var(--blanco);
             font-family: 'DM Sans', sans-serif;
@@ -252,7 +306,7 @@ $(document).ready(function(){
 
     @if(count($todosDetalles) > 0)
     <div class="spa-carrito-wrapper">
-        <table class="spa-carrito-table">
+        <table class="spa-carrito-table" id="tabla-servicios-mod">
             <thead>
                 <tr>
                     <th>#</th>
@@ -262,11 +316,13 @@ $(document).ready(function(){
                     <th>Flequillo</th>
                     <th>Estilo</th>
                     <th>Servicio Add.</th>
+                    {{-- ✦ NUEVA columna de Acciones --}}
+                    <th style="text-align:center;">Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($todosDetalles as $i => $d)
-                <tr>
+                <tr id="fila-servicio-{{ $d->idd }}">
                     <td style="color:var(--gris-med); font-size:12px;">{{ $i + 1 }}</td>
                     <td>{{ $d->genero }}</td>
                     <td>{{ $d->largo }}</td>
@@ -274,22 +330,24 @@ $(document).ready(function(){
                     <td>{{ $d->flequillo }}</td>
                     <td>{{ $d->estilo }}</td>
                     <td>{{ $d->servicio }}</td>
+                    {{-- ✦ BOTÓN X por fila --}}
+                    <td style="text-align:center;">
+                        <button
+                            type="button"
+                            class="spa-btn-x btn-eliminar-servicio"
+                            data-idd="{{ $d->idd }}"
+                            data-idac="{{ $d->idac }}"
+                            title="Eliminar servicio {{ $i + 1 }}"
+                            aria-label="Eliminar fila {{ $i + 1 }}">
+                        </button>
+                    </td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
     @else
-    <div style="
-        background: var(--blanco);
-        border: 1px solid var(--gris-clr);
-        border-radius: 8px;
-        padding: 24px;
-        text-align: center;
-        color: var(--gris-med);
-        font-style: italic;
-        font-size: 13px;
-    ">
+    <div id="msg-sin-servicios" class="spa-sin-servicios">
         Esta cita no tiene servicios registrados aún.
     </div>
     @endif

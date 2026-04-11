@@ -7,6 +7,92 @@
 <script type="text/javascript">
 $(document).ready(function(){
 
+    /* ─────────────────────────────────────────────
+       VALIDACIÓN EN TIEMPO REAL
+       ───────────────────────────────────────────── */
+
+    // NOMBRE: solo letras, espacios y acentos — bloquea números y especiales
+    $("#nombre, #ap").on("input", function(){
+        // Elimina cualquier carácter que NO sea letra o espacio
+        var limpio = $(this).val().replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, "");
+        $(this).val(limpio);
+        validarCampo($(this));
+    });
+
+    // TELÉFONO: solo dígitos, máximo 10
+    $("#telefono").on("input", function(){
+        var limpio = $(this).val().replace(/\D/g, "").slice(0, 10);
+        $(this).val(limpio);
+        validarCampo($(this));
+    });
+
+    // Validar al perder el foco también
+    $(".spa-input[data-validar]").on("blur", function(){
+        validarCampo($(this));
+    });
+
+    /* ─────────────────────────────────────────────
+       FUNCIÓN DE VALIDACIÓN DE CAMPO
+       ───────────────────────────────────────────── */
+    function validarCampo($input) {
+        var id  = $input.attr("id");
+        var val = $.trim($input.val());
+        var msg = "";
+
+        if (id === "nombre" || id === "ap") {
+            if (val === "") {
+                msg = "Este campo es obligatorio.";
+            } else if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(val)) {
+                msg = "Solo se permiten letras y espacios.";
+            }
+        }
+
+        if (id === "telefono") {
+            if (val === "") {
+                msg = "El teléfono es obligatorio.";
+            } else if (!/^\d{10}$/.test(val)) {
+                msg = "Debe contener exactamente 10 dígitos.";
+            }
+        }
+
+        mostrarError($input, msg);
+        return msg === "";
+    }
+
+    /* ─────────────────────────────────────────────
+       MOSTRAR / OCULTAR MENSAJE DE ERROR
+       ───────────────────────────────────────────── */
+    function mostrarError($input, msg) {
+        var $err = $("#err-" + $input.attr("id"));
+        if (msg) {
+            $input.addClass("spa-input-error");
+            $err.text(msg).removeClass("spa-hidden");
+        } else {
+            $input.removeClass("spa-input-error");
+            $err.addClass("spa-hidden").text("");
+        }
+    }
+
+    /* ─────────────────────────────────────────────
+       VALIDAR FORMULARIO COMPLETO ANTES DE AGREGAR
+       ───────────────────────────────────────────── */
+    function validarFormulario() {
+        var ok = true;
+
+        // Validar nombre, apellido y teléfono
+        ["nombre", "ap", "telefono"].forEach(function(id){
+            var $input = $("#" + id);
+            if ($input.length && !$input.prop("readonly")) {
+                if (!validarCampo($input)) ok = false;
+            }
+        });
+
+        return ok;
+    }
+
+    /* ─────────────────────────────────────────────
+       SELECT CLIENTE — autorellenar campos
+       ───────────────────────────────────────────── */
     $("#select-cliente").change(function(){
         var opt = this.options[this.selectedIndex];
         if(opt.value != ""){
@@ -20,8 +106,15 @@ $(document).ready(function(){
             $("#ap").val("");
             $("#telefono").val("");
         }
+        // Limpiar errores al seleccionar cliente
+        ["nombre", "ap", "telefono"].forEach(function(id){
+            mostrarError($("#" + id), "");
+        });
     });
 
+    /* ─────────────────────────────────────────────
+       CAMBIO DE GÉNERO
+       ───────────────────────────────────────────── */
     $("#idtc").change(function(){
         var g = this.value;
         $("#bloque-hombre, #bloque-mujer, #bloque-servicios-h, #bloque-servicios-m").addClass('spa-hidden');
@@ -32,7 +125,23 @@ $(document).ready(function(){
         }
     });
 
+    /* ─────────────────────────────────────────────
+       BOTÓN AGREGAR AL CARRITO — con validación
+       ───────────────────────────────────────────── */
     $("#btn-agregar").click(function(){
+        // 1. Validar ANTES de enviar cualquier petición
+        if (!validarFormulario()) {
+            // Hay errores → desplazarse al primer campo con error y detener
+            var $primerError = $(".spa-input-error").first();
+            if ($primerError.length) {
+                $('html, body').animate({
+                    scrollTop: $primerError.offset().top - 120
+                }, 300);
+            }
+            return; // ← DETIENE el proceso, no hace la petición AJAX
+        }
+
+        // 2. Sin errores → cargar carrito
         $("#carrito").load(
             '{{ url("cargacarritocitas") }}' + '?' + $("#form-cita").serialize()
         );
@@ -79,21 +188,53 @@ $(document).ready(function(){
         </div>
 
         <div class="spa-grid">
+            {{-- IDC (solo lectura) --}}
             <div class="spa-field">
                 <label class="spa-label">IDC</label>
                 <input type="text" name="idc" id="idc" class="spa-input" value="{{ $sigue }}" readonly>
             </div>
+
+            {{-- TELÉFONO con validación --}}
             <div class="spa-field">
-                <label class="spa-label">Teléfono</label>
-                <input type="text" name="telefono" id="telefono" class="spa-input" maxlength="15">
+                <label class="spa-label">Teléfono <span style="color:var(--error);">*</span></label>
+                <input type="tel"
+                       name="telefono"
+                       id="telefono"
+                       class="spa-input"
+                       maxlength="10"
+                       pattern="\d{10}"
+                       placeholder="10 dígitos"
+                       data-validar="true"
+                       autocomplete="tel">
+                <span id="err-telefono" class="spa-error-msg spa-hidden"></span>
             </div>
+
+            {{-- NOMBRE con validación --}}
             <div class="spa-field">
-                <label class="spa-label">Nombre</label>
-                <input type="text" name="nombre" id="nombre" class="spa-input">
+                <label class="spa-label">Nombre <span style="color:var(--error);">*</span></label>
+                <input type="text"
+                       name="nombre"
+                       id="nombre"
+                       class="spa-input"
+                       pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$"
+                       placeholder="Solo letras"
+                       data-validar="true"
+                       autocomplete="given-name">
+                <span id="err-nombre" class="spa-error-msg spa-hidden"></span>
             </div>
+
+            {{-- APELLIDO con validación --}}
             <div class="spa-field">
-                <label class="spa-label">Apellido Paterno</label>
-                <input type="text" name="ap" id="ap" class="spa-input">
+                <label class="spa-label">Apellido Paterno <span style="color:var(--error);">*</span></label>
+                <input type="text"
+                       name="ap"
+                       id="ap"
+                       class="spa-input"
+                       pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$"
+                       placeholder="Solo letras"
+                       data-validar="true"
+                       autocomplete="family-name">
+                <span id="err-ap" class="spa-error-msg spa-hidden"></span>
             </div>
         </div>
     </div>

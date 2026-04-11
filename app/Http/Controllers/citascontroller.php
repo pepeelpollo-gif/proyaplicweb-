@@ -37,17 +37,31 @@ class citascontroller extends Controller
             ->with('clientes',     $clientes);
     }
 
+    /* ═══════════════════════════════════════════════════════════
+       cargacarrito — Agrega un servicio al carrito (AJAX)
+       ✦ Validación de seguridad backend añadida
+       ═══════════════════════════════════════════════════════════ */
     public function cargacarrito(Request $request)
     {
+        // ── VALIDACIÓN BACKEND ───────────────────────────────────
+        $errores = $this->validarDatosCliente($request);
+
+        if (!empty($errores)) {
+            // Devuelve JSON de error; el frontend puede manejarlo
+            // (en este flujo jQuery/AJAX el carrito simplemente no se carga)
+            return response()->json(['ok' => false, 'errores' => $errores], 422);
+        }
+        // ────────────────────────────────────────────────────────
+
         $idc = (int) $request->idc;
 
         $existeCliente = \DB::select("SELECT COUNT(*) as cuantos FROM clientes WHERE idc = ?", [$idc]);
         if ($existeCliente[0]->cuantos == 0) {
             $cliente           = new clientes;
             $cliente->idc      = $idc;
-            $cliente->nombre   = $request->nombre;
-            $cliente->ap       = $request->ap;
-            $cliente->telefono = $request->telefono;
+            $cliente->nombre   = trim($request->nombre);
+            $cliente->ap       = trim($request->ap);
+            $cliente->telefono = trim($request->telefono);
             $cliente->save();
         }
 
@@ -83,6 +97,9 @@ class citascontroller extends Controller
         return view('citas.carrito')->with('carrito', $this->getCarrito($idac));
     }
 
+    /* ═══════════════════════════════════════════════════════════
+       eliminadetalle — Elimina un detalle por idd (AJAX)
+       ═══════════════════════════════════════════════════════════ */
     public function eliminadetalle(Request $request)
     {
         $idd  = (int) $request->idd;
@@ -93,6 +110,9 @@ class citascontroller extends Controller
         return view('citas.carrito')->with('carrito', $this->getCarrito($idac));
     }
 
+    /* ═══════════════════════════════════════════════════════════
+       reporte — Lista general de citas
+       ═══════════════════════════════════════════════════════════ */
     public function reporte()
     {
         $reporte = \DB::select("
@@ -118,6 +138,9 @@ class citascontroller extends Controller
         return view('citas.reporte')->with('reporte', $reporte);
     }
 
+    /* ═══════════════════════════════════════════════════════════
+       modificacita — Formulario de modificación
+       ═══════════════════════════════════════════════════════════ */
     public function modificacita(Request $request)
     {
         $idac = (int) $request->idac;
@@ -137,11 +160,9 @@ class citascontroller extends Controller
 
         $cita    = $cita[0];
 
-        // Primer detalle para prellenar el formulario
         $detalle = \DB::select("SELECT * FROM detalles WHERE idac = ? LIMIT 1", [$idac]);
         $detalle = count($detalle) > 0 ? $detalle[0] : null;
 
-        // Todos los detalles con JOINs para mostrar la tabla de servicios
         $todosDetalles = $this->getCarrito($idac);
 
         $tiposcliente = \DB::select("SELECT idtc, tipo_cliente FROM tipo_cliente ORDER BY idtc ASC");
@@ -167,9 +188,24 @@ class citascontroller extends Controller
             ->with('estilos',       $estilos);
     }
 
+    /* ═══════════════════════════════════════════════════════════
+       guardamodifica — Guarda los cambios de una cita
+       ✦ Validación de seguridad backend añadida
+       ═══════════════════════════════════════════════════════════ */
     public function guardamodifica(Request $request)
     {
         $idac = (int) $request->idac;
+
+        // ── VALIDACIÓN BACKEND (segunda línea de defensa) ────────
+        // El teléfono en la vista de modificar es readonly, pero
+        // validamos igualmente para proteger contra peticiones directas.
+        $telefono = trim($request->telefono ?? '');
+        if ($telefono !== '' && !ctype_digit($telefono)) {
+            return back()->withErrors([
+                'telefono' => 'El teléfono solo puede contener dígitos numéricos.'
+            ])->withInput();
+        }
+        // ────────────────────────────────────────────────────────
 
         \DB::update("UPDATE citas SET fecha = ?, hora = ?, idtc = ? WHERE idac = ?", [
             $request->fecha, $request->hora, $request->idtc, $idac
@@ -205,6 +241,13 @@ class citascontroller extends Controller
         return redirect()->route('reportecitas');
     }
 
+    /* ═══════════════════════════════════════════════════════════
+       MÉTODOS PRIVADOS
+       ═══════════════════════════════════════════════════════════ */
+
+    /**
+     * getCarrito — Obtiene todos los detalles de una cita con JOINs
+     */
     private function getCarrito($idac)
     {
         return \DB::select("
@@ -227,5 +270,46 @@ class citascontroller extends Controller
             WHERE d.idac = ?
             ORDER BY d.idd ASC
         ", [$idac]);
+    }
+
+    /**
+     * validarDatosCliente — Validación de seguridad en backend
+     *
+     * Reglas:
+     *   - nombre / ap : solo letras, acentos y espacios
+     *   - telefono    : exactamente 10 dígitos numéricos (ctype_digit + strlen)
+     *
+     * Devuelve array vacío si todo es válido, o array con mensajes de error.
+     */
+    private function validarDatosCliente(Request $request): array
+    {
+        $errores  = [];
+        $nombre   = trim($request->nombre ?? '');
+        $ap       = trim($request->ap     ?? '');
+        $telefono = trim($request->telefono ?? '');
+
+        // Validar Nombre
+        if ($nombre === '') {
+            $errores['nombre'] = 'El nombre es obligatorio.';
+        } elseif (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u', $nombre)) {
+            $errores['nombre'] = 'El nombre solo puede contener letras y espacios.';
+        }
+
+        // Validar Apellido
+        if ($ap === '') {
+            $errores['ap'] = 'El apellido es obligatorio.';
+        } elseif (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u', $ap)) {
+            $errores['ap'] = 'El apellido solo puede contener letras y espacios.';
+        }
+
+        // Validar Teléfono — ctype_digit es la verificación más estricta en PHP:
+        // rechaza espacios, guiones, paréntesis y cualquier no-dígito
+        if ($telefono === '') {
+            $errores['telefono'] = 'El teléfono es obligatorio.';
+        } elseif (!ctype_digit($telefono) || strlen($telefono) !== 10) {
+            $errores['telefono'] = 'El teléfono debe contener exactamente 10 dígitos numéricos.';
+        }
+
+        return $errores;
     }
 }
