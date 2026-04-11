@@ -7,7 +7,6 @@
 <script type="text/javascript">
 $(document).ready(function(){
 
-    // Mostrar/ocultar bloques por género según valor actual
     function mostrarGenero(g){
         $("#bloque-hombre, #bloque-mujer, #bloque-servicios-h, #bloque-servicios-m").addClass('spa-hidden');
         if(g == 1){
@@ -17,7 +16,6 @@ $(document).ready(function(){
         }
     }
 
-    // Ejecutar al cargar con el valor actual
     mostrarGenero($("#idtc").val());
 
     $("#idtc").change(function(){
@@ -42,10 +40,9 @@ $(document).ready(function(){
 <div class="spa-container">
 <form action="{{ route('guardamodifica') }}" method="POST">
     @csrf
-
     <input type="hidden" name="idac" value="{{ $cita->idac }}">
 
-    {{-- CLIENTE (solo lectura, no se modifica el cliente) --}}
+    {{-- CLIENTE (solo lectura) --}}
     <div class="spa-section">
         <div class="spa-section-label">Datos del Cliente</div>
         <div class="spa-grid">
@@ -230,6 +227,75 @@ $(document).ready(function(){
     </div>
 
 </form>
+
+{{-- ===================== SERVICIOS REGISTRADOS ===================== --}}
+<div style="margin-top: 40px;">
+
+    {{-- Encabezado con contador --}}
+    <div style="display:flex; align-items:center; gap:14px; margin-bottom:14px;">
+        <div class="spa-section-label" style="margin-bottom:0; flex:1;">
+            Servicios registrados en esta cita
+        </div>
+        <span style="
+            background: var(--carbon);
+            color: var(--blanco);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 3px 12px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+        ">
+            {{ count($todosDetalles) }} servicio{{ count($todosDetalles) != 1 ? 's' : '' }}
+        </span>
+    </div>
+
+    @if(count($todosDetalles) > 0)
+    <div class="spa-carrito-wrapper">
+        <table class="spa-carrito-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Género</th>
+                    <th>Largo</th>
+                    <th>Corte</th>
+                    <th>Flequillo</th>
+                    <th>Estilo</th>
+                    <th>Servicio Add.</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($todosDetalles as $i => $d)
+                <tr>
+                    <td style="color:var(--gris-med); font-size:12px;">{{ $i + 1 }}</td>
+                    <td>{{ $d->genero }}</td>
+                    <td>{{ $d->largo }}</td>
+                    <td>{{ $d->corte }}</td>
+                    <td>{{ $d->flequillo }}</td>
+                    <td>{{ $d->estilo }}</td>
+                    <td>{{ $d->servicio }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+    @else
+    <div style="
+        background: var(--blanco);
+        border: 1px solid var(--gris-clr);
+        border-radius: 8px;
+        padding: 24px;
+        text-align: center;
+        color: var(--gris-med);
+        font-style: italic;
+        font-size: 13px;
+    ">
+        Esta cita no tiene servicios registrados aún.
+    </div>
+    @endif
+
 </div>
+
+</div>{{-- fin spa-container --}}
 
 @stop

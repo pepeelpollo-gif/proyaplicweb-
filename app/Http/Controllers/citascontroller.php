@@ -80,8 +80,7 @@ class citascontroller extends Controller
         $det->ids = $request->ids ?: null;
         $det->save();
 
-        $carrito = $this->getCarrito($idac);
-        return view('citas.carrito')->with('carrito', $carrito);
+        return view('citas.carrito')->with('carrito', $this->getCarrito($idac));
     }
 
     public function eliminadetalle(Request $request)
@@ -91,8 +90,7 @@ class citascontroller extends Controller
 
         \DB::delete("DELETE FROM detalles WHERE idd = ?", [$idd]);
 
-        $carrito = $this->getCarrito($idac);
-        return view('citas.carrito')->with('carrito', $carrito);
+        return view('citas.carrito')->with('carrito', $this->getCarrito($idac));
     }
 
     public function reporte()
@@ -138,8 +136,13 @@ class citascontroller extends Controller
         }
 
         $cita    = $cita[0];
+
+        // Primer detalle para prellenar el formulario
         $detalle = \DB::select("SELECT * FROM detalles WHERE idac = ? LIMIT 1", [$idac]);
         $detalle = count($detalle) > 0 ? $detalle[0] : null;
+
+        // Todos los detalles con JOINs para mostrar la tabla de servicios
+        $todosDetalles = $this->getCarrito($idac);
 
         $tiposcliente = \DB::select("SELECT idtc, tipo_cliente FROM tipo_cliente ORDER BY idtc ASC");
         $largosh      = \DB::select("SELECT idlcm, largo FROM largo_cabello_m WHERE idtc = 1 ORDER BY idlcm ASC");
@@ -151,31 +154,27 @@ class citascontroller extends Controller
         $estilos      = \DB::select("SELECT idec, estilo FROM estilo_cabello ORDER BY idec ASC");
 
         return view('citas.modificar')
-            ->with('cita',         $cita)
-            ->with('detalle',      $detalle)
-            ->with('tiposcliente', $tiposcliente)
-            ->with('largosh',      $largosh)
-            ->with('largosm',      $largosm)
-            ->with('cortesh',      $cortesh)
-            ->with('cortesm',      $cortesm)
-            ->with('flequillos',   $flequillos)
-            ->with('servicios',    $servicios)
-            ->with('estilos',      $estilos);
+            ->with('cita',          $cita)
+            ->with('detalle',       $detalle)
+            ->with('todosDetalles', $todosDetalles)
+            ->with('tiposcliente',  $tiposcliente)
+            ->with('largosh',       $largosh)
+            ->with('largosm',       $largosm)
+            ->with('cortesh',       $cortesh)
+            ->with('cortesm',       $cortesm)
+            ->with('flequillos',    $flequillos)
+            ->with('servicios',     $servicios)
+            ->with('estilos',       $estilos);
     }
 
     public function guardamodifica(Request $request)
     {
         $idac = (int) $request->idac;
 
-        // Actualizar cita
         \DB::update("UPDATE citas SET fecha = ?, hora = ?, idtc = ? WHERE idac = ?", [
-            $request->fecha,
-            $request->hora,
-            $request->idtc,
-            $idac
+            $request->fecha, $request->hora, $request->idtc, $idac
         ]);
 
-        // Actualizar primer detalle de la cita
         $detalle = \DB::select("SELECT idd FROM detalles WHERE idac = ? LIMIT 1", [$idac]);
 
         if (count($detalle) > 0) {
@@ -206,7 +205,6 @@ class citascontroller extends Controller
         return redirect()->route('reportecitas');
     }
 
-    // Método privado para reutilizar el SELECT del carrito
     private function getCarrito($idac)
     {
         return \DB::select("
