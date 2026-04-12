@@ -1,25 +1,17 @@
-/* =============================================
-   AURA SPA — Módulo de Control de Citas
-   ============================================= */
-
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap');
 
-/* === VARIABLES === */
 :root {
-    --crema:     #f5f0ea;
-    --blanco:    #ffffff;
-    --carbon:    #1e1e1e;
-    --gris-med:  #6b6560;
-    --gris-clr:  #e8e3dc;
-    --acento:    #8b7355;
-    --acento-clr:#c4a882;
-    --error:     #c0392b;
-    --success:   #5a7a5a;
-    --radio:     4px;
-    --sombra:    0 2px 12px rgba(30,30,30,0.07);
+    --crema:    #f5f0ea;
+    --blanco:   #ffffff;
+    --carbon:   #1e1e1e;
+    --gris-med: #6b6560;
+    --gris-clr: #e8e3dc;
+    --acento:   #8b7355;
+    --error:    #c0392b;
+    --radio:    4px;
+    --sombra:   0 2px 12px rgba(30,30,30,0.07);
 }
 
-/* === BASE === */
 body {
     background-color: var(--crema);
     font-family: 'DM Sans', sans-serif;
@@ -28,7 +20,7 @@ body {
     line-height: 1.6;
 }
 
-/* === ENCABEZADO DE PÁGINA === */
+/* === ENCABEZADO === */
 .spa-header {
     display: flex;
     align-items: flex-end;
@@ -62,14 +54,14 @@ body {
     padding-bottom: 4px;
 }
 
-/* === LAYOUT GENERAL === */
+/* === LAYOUT === */
 .spa-container {
     max-width: 960px;
     margin: 0 auto;
     padding: 0 40px 60px;
 }
 
-/* === SECCIONES DEL FORMULARIO === */
+/* === SECCIONES === */
 .spa-section {
     background: var(--blanco);
     border-radius: 8px;
@@ -77,7 +69,6 @@ body {
     margin-bottom: 20px;
     box-shadow: var(--sombra);
     border: 1px solid var(--gris-clr);
-    position: relative;
 }
 
 .spa-section-label {
@@ -99,29 +90,20 @@ body {
     background: var(--gris-clr);
 }
 
-/* === GRID DE CAMPOS === */
+/* === GRIDS === */
 .spa-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px 24px;
 }
 
-.spa-grid.cols-3 {
-    grid-template-columns: 1fr 1fr 1fr;
-}
-
-.spa-grid.cols-1 {
-    grid-template-columns: 1fr;
-}
+.spa-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.spa-grid.cols-1 { grid-template-columns: 1fr; }
 
 .spa-field {
     display: flex;
     flex-direction: column;
     gap: 6px;
-}
-
-.spa-field.full {
-    grid-column: 1 / -1;
 }
 
 /* === LABELS === */
@@ -171,7 +153,7 @@ body {
     padding-right: 36px;
 }
 
-/* === RADIO BUTTONS === */
+/* === RADIO === */
 .spa-radio-group {
     display: flex;
     flex-wrap: wrap;
@@ -205,7 +187,7 @@ body {
     color: var(--acento);
 }
 
-/* === BOTÓN PRINCIPAL === */
+/* === BOTONES === */
 .spa-btn {
     display: inline-flex;
     align-items: center;
@@ -231,9 +213,7 @@ body {
     text-decoration: none;
 }
 
-.spa-btn:active {
-    transform: translateY(0);
-}
+.spa-btn:active { transform: translateY(0); }
 
 .spa-btn-outline {
     background: transparent;
@@ -247,9 +227,14 @@ body {
     color: var(--carbon);
 }
 
-/* === BLOQUE OCULTO === */
-.spa-hidden {
-    display: none;
+.spa-hidden { display: none; }
+
+/* === ACCIONES === */
+.spa-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 0 0;
 }
 
 /* === CARRITO === */
@@ -287,20 +272,15 @@ body {
     transition: background 0.15s;
 }
 
-.spa-carrito-table tbody tr:last-child {
-    border-bottom: none;
-}
-
-.spa-carrito-table tbody tr:hover {
-    background: var(--crema);
-}
+.spa-carrito-table tbody tr:last-child { border-bottom: none; }
+.spa-carrito-table tbody tr:hover { background: var(--crema); }
 
 .spa-carrito-table td {
     padding: 11px 16px;
     color: var(--carbon);
 }
 
-/* === BOTÓN X (eliminar carrito) === */
+/* === BOTÓN X (eliminar) === */
 .spa-btn-x {
     display: inline-flex;
     align-items: center;
@@ -324,23 +304,16 @@ body {
     height: 2px;
     background: var(--error);
     border-radius: 2px;
-    transition: transform 0.2s, width 0.2s;
+    transition: transform 0.2s;
 }
 
 .spa-btn-x::before { transform: rotate(45deg); }
 .spa-btn-x::after  { transform: rotate(-45deg); }
 
-.spa-btn-x:hover {
-    background: rgba(192, 57, 43, 0.1);
-}
+.spa-btn-x:hover { background: rgba(192,57,43,0.1); }
 
-.spa-btn-x:hover::before {
-    transform: rotate(45deg) scale(1.2);
-}
-
-.spa-btn-x:hover::after {
-    transform: rotate(-45deg) scale(1.2);
-}
+.spa-btn-x:hover::before { transform: rotate(45deg) scale(1.2); }
+.spa-btn-x:hover::after  { transform: rotate(-45deg) scale(1.2); }
 
 /* === BOTÓN LÁPIZ (modificar) === */
 .spa-btn-edit {
@@ -394,9 +367,7 @@ body {
     transition: background 0.15s;
 }
 
-.spa-reporte-table tbody tr:hover {
-    background: rgba(139,115,85,0.05);
-}
+.spa-reporte-table tbody tr:hover { background: rgba(139,115,85,0.05); }
 
 .spa-reporte-table td {
     padding: 13px 16px;
@@ -411,83 +382,16 @@ body {
     font-weight: 500;
 }
 
-.spa-badge-h {
-    background: #e8f0f8;
-    color: #2c5282;
-}
-
-.spa-badge-m {
-    background: #f8e8f0;
-    color: #822c5b;
-}
+.spa-badge-h { background: #e8f0f8; color: #2c5282; }
+.spa-badge-m { background: #f8e8f0; color: #822c5b; }
 
 .spa-num {
     font-weight: 600;
     color: var(--acento);
 }
 
-/* === ACCIONES === */
-.spa-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 20px 0 0;
-}
-
 /* === NAVBAR === */
 .navbar {
     font-family: 'DM Sans', sans-serif !important;
     font-size: 14px;
-}
-
-
-/* ── Input en estado de error ──────────────────── */
-.spa-input-error {
-    border-color: var(--error) !important;
-    background-color: rgba(192, 57, 43, 0.04) !important;
-    box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.10) !important;
-}
-
-/* ── Mensaje de error bajo el campo ───────────── */
-.spa-error-msg {
-    font-size: 11.5px;
-    color: var(--error);
-    font-weight: 500;
-    letter-spacing: 0.2px;
-    margin-top: 2px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.spa-error-msg::before {
-    content: '⚠';
-    font-size: 11px;
-}
-
-/* ── Mensaje de tabla vacía ────────────────────── */
-.spa-sin-servicios {
-    background: var(--blanco);
-    border: 1px solid var(--gris-clr);
-    border-radius: 8px;
-    padding: 24px;
-    text-align: center;
-    color: var(--gris-med);
-    font-style: italic;
-    font-size: 13px;
-}
-
-/* ── Animación al eliminar una fila ───────────── */
-.spa-fila-eliminando {
-    background-color: rgba(192, 57, 43, 0.06) !important;
-    opacity: 0;
-    transform: translateX(12px);
-    transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.1s;
-}
-
-/* ── Columna Acciones en tabla de modificar ───── */
-#tabla-servicios-mod th:last-child,
-#tabla-servicios-mod td:last-child {
-    width: 60px;
-    text-align: center;
 }

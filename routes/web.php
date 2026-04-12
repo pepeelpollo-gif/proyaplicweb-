@@ -8,11 +8,15 @@ use App\Http\Controllers\jquerycontroller;
 use App\Http\Controllers\actividadescontroller;
 use App\Http\Controllers\citascontroller;
 
-// --- Rutas de Citas ---
+// Rutas de Citas
 Route::get('altacita',          [citascontroller::class, 'altacita'])->name('altacita');
 Route::get('cargacarritocitas', [citascontroller::class, 'cargacarrito'])->name('cargacarritocitas');
 Route::get('reportecitas',      [citascontroller::class, 'reporte'])->name('reportecitas');
-Route::get('eliminadetalle', [citascontroller::class, 'eliminadetalle'])->name('eliminadetalle');
+Route::get('eliminadetalle',    [citascontroller::class, 'eliminadetalle'])->name('eliminadetalle');
+Route::get('modificacita',      [citascontroller::class, 'modificacita'])->name('modificacita');
+Route::post('guardamodifica',   [citascontroller::class, 'guardamodifica'])->name('guardamodifica');
+
+
 
 // --- Rutas de Empleados ---
 Route::get('inicio',[empleadoscontroller::class,'inicio'])->name('inicio');
@@ -24,15 +28,6 @@ Route::get('activaempleado',[empleadoscontroller::class,'activaempleado'])->name
 Route::get('eliminaempleado',[empleadoscontroller::class,'eliminaempleado'])->name('eliminaempleado');
 Route::get('editaempleado',[empleadoscontroller::class,'editaempleado'])->name('editaempleado');
 Route::post('actualizaemp',[empleadoscontroller::class,'actualizaemp'])->name('actualizaemp');
-
-
-// --- Rutas de Citas (reemplaza las anteriores) ---
-Route::get('altacita',          [citascontroller::class, 'altacita'])->name('altacita');
-Route::get('cargacarritocitas', [citascontroller::class, 'cargacarrito'])->name('cargacarritocitas');
-Route::get('reportecitas',      [citascontroller::class, 'reporte'])->name('reportecitas');
-Route::get('eliminadetalle',    [citascontroller::class, 'eliminadetalle'])->name('eliminadetalle');
-Route::get('modificacita',      [citascontroller::class, 'modificacita'])->name('modificacita');
-Route::post('guardamodifica',   [citascontroller::class, 'guardamodifica'])->name('guardamodifica');
 
 
 
