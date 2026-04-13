@@ -14,7 +14,6 @@ class citascontroller extends Controller
     {
         $ultimocliente = DB::select("SELECT idc FROM clientes ORDER BY idc DESC LIMIT 1");
         $sigue         = count($ultimocliente) == 0 ? 1 : $ultimocliente[0]->idc + 1;
-
         $tiposcliente = DB::select("SELECT idtc, tipo_cliente FROM tipo_cliente ORDER BY idtc ASC");
         $largosh      = DB::select("SELECT idlcm, largo FROM largo_cabello_m WHERE idtc = 1 ORDER BY idlcm ASC");
         $largosm      = DB::select("SELECT idlcm, largo FROM largo_cabello_m WHERE idtc = 2 ORDER BY idlcm ASC");
