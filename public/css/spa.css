@@ -128,8 +128,8 @@ body {
     font-size: 14px;
     transition: border-color 0.2s, box-shadow 0.2s;
     box-sizing: border-box;
-    appearance: none;
     -webkit-appearance: none;
+    appearance: none;
 }
 
 .spa-input:focus,
@@ -172,7 +172,6 @@ body {
     font-size: 13px;
     color: var(--carbon);
     transition: all 0.18s;
-    user-select: none;
 }
 
 .spa-radio-option input[type="radio"] {
@@ -394,4 +393,16 @@ body {
 .navbar {
     font-family: 'DM Sans', sans-serif !important;
     font-size: 14px;
+}
+
+.spa-input-error {
+    border-color: #e53e3e;
+    background: #fff5f5;
+}
+.spa-error-msg {
+    display: block;
+    color: #e53e3e;
+    font-size: 12px;
+    margin-top: 4px;
+    font-family: 'DM Sans', sans-serif;
 }
