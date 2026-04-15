@@ -35,8 +35,20 @@ $(document).ready(function() {
         mostrarGenero(this.value);
     });
 
-    $('#btn-agregar').click(function() {
-        $('#carrito').load('{{ url("cargacarritocitas") }}' + '?' + $('#form-cita').serialize());
+   $('#btn-agregar').click(function(e) {
+        e.preventDefault();
+        
+        // CORRECCIÓN: Capturamos la carga completa del carrito antes de desplazar
+        $('#carrito').load('{{ route("cargacarritocitas") }}?' + $('#form-cita').serialize(), function() {
+            
+            // Calculamos la posición del div de carrito
+            var destino = $('#carrito').offset().top - 100;
+            
+            // Animación de desplazamiento suave
+            $('html, body').animate({
+                scrollTop: destino
+            }, 800);
+        });
     });
 
 });

@@ -22,6 +22,16 @@ $(document).ready(function() {
         mostrarGenero(this.value);
     });
 
+    // CORRECCIÓN: Agregar botón para añadir nuevos servicios usando AJAX
+    $('#btn-agregar-mod').click(function(e) {
+        e.preventDefault();
+        $('#carrito-modificar').load('{{ route("cargacarritocitas") }}?' + $('#form-modificar').serialize(), function() {
+            $('html, body').animate({
+                scrollTop: $("#carrito-modificar").offset().top - 50
+            }, 500);
+        });
+    });
+
 });
 </script>
 
@@ -37,29 +47,29 @@ $(document).ready(function() {
 
 <div class="spa-container">
 
-<form action="{{ route('guardamodifica') }}" method="POST">
+<form id="form-modificar" action="{{ route('guardamodifica') }}" method="POST">
     @csrf
     <input type="hidden" name="idac" value="{{ $cita->idac }}">
 
-    {{-- CLIENTE (solo lectura) --}}
+    {{-- CLIENTE (solo lectura) - SE AGREGARON los 'name' para el envio ajax --}}
     <div class="spa-section">
         <div class="spa-section-label">Datos del Cliente</div>
         <div class="spa-grid">
             <div class="spa-field">
                 <label class="spa-label">IDC</label>
-                <input type="text" class="spa-input" value="{{ $cita->idc }}" readonly>
+                <input type="text" name="idc" class="spa-input" value="{{ $cita->idc }}" readonly>
             </div>
             <div class="spa-field">
                 <label class="spa-label">Teléfono</label>
-                <input type="text" class="spa-input" value="{{ $cita->telefono }}" readonly>
+                <input type="text" name="telefono" class="spa-input" value="{{ $cita->telefono }}" readonly>
             </div>
             <div class="spa-field">
                 <label class="spa-label">Nombre</label>
-                <input type="text" class="spa-input" value="{{ $cita->nombre }}" readonly>
+                <input type="text" name="nombre" class="spa-input" value="{{ $cita->nombre }}" readonly>
             </div>
             <div class="spa-field">
                 <label class="spa-label">Apellido Paterno</label>
-                <input type="text" class="spa-input" value="{{ $cita->ap }}" readonly>
+                <input type="text" name="ap" class="spa-input" value="{{ $cita->ap }}" readonly>
             </div>
         </div>
     </div>
@@ -221,7 +231,8 @@ $(document).ready(function() {
     </div>
 
     <div class="spa-actions">
-        <button type="submit" class="spa-btn">Guardar cambios</button>
+        <button type="button" id="btn-agregar-mod" class="spa-btn">+ Agregar servicio</button>
+        <button type="submit" class="spa-btn">Guardar cambios (Cita)</button>
         <a href="{{ route('reportecitas') }}" class="spa-btn spa-btn-outline">Cancelar</a>
     </div>
 
@@ -229,52 +240,16 @@ $(document).ready(function() {
 
 {{-- TABLA DE SERVICIOS REGISTRADOS --}}
 <div style="margin-top:40px;">
-
     <div style="display:flex; align-items:center; gap:14px; margin-bottom:14px;">
         <div class="spa-section-label" style="margin-bottom:0; flex:1;">
             Servicios registrados en esta cita
         </div>
-        <span style="background:var(--carbon); color:var(--blanco); font-size:12px; font-weight:600;
-                     padding:3px 12px; border-radius:20px; letter-spacing:0.5px; font-family:'DM Sans',sans-serif;">
-            {{ count($todosDetalles) }} servicio{{ count($todosDetalles) != 1 ? 's' : '' }}
-        </span>
     </div>
 
-    @if(count($todosDetalles) > 0)
-    <div class="spa-carrito-wrapper">
-        <table class="spa-carrito-table">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Género</th>
-                    <th>Largo</th>
-                    <th>Corte</th>
-                    <th>Flequillo</th>
-                    <th>Estilo</th>
-                    <th>Servicio Add.</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($todosDetalles as $i => $d)
-                <tr>
-                    <td style="color:var(--gris-med); font-size:12px;">{{ $i + 1 }}</td>
-                    <td>{{ $d->genero }}</td>
-                    <td>{{ $d->largo }}</td>
-                    <td>{{ $d->corte }}</td>
-                    <td>{{ $d->flequillo }}</td>
-                    <td>{{ $d->estilo }}</td>
-                    <td>{{ $d->servicio }}</td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+    {{-- CORRECCIÓN: Ahora reutilizamos tu vista de carrito para tener automáticamente botones de eliminar --}}
+    <div id="carrito-modificar">
+        @include('citas.carrito', ['carrito' => $todosDetalles])
     </div>
-    @else
-    <div style="background:var(--blanco); border:1px solid var(--gris-clr); border-radius:8px;
-                padding:24px; text-align:center; color:var(--gris-med); font-style:italic; font-size:13px;">
-        Esta cita no tiene servicios registrados aún.
-    </div>
-    @endif
 
 </div>
 
