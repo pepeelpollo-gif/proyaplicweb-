@@ -21,7 +21,7 @@
                 <td>{{ $item->estilo }}</td>
                 <td>{{ $item->servicio }}</td>
                 <td style="text-align:center;">
-                    <button class="spa-btn-x btn-eliminar-detalle"
+                    <button type="button" class="spa-btn-x btn-eliminar-detalle"
                             data-idd="{{ $item->idd }}"
                             data-idac="{{ $item->idac }}"
                             data-url="{{ url('eliminadetalle') }}"
@@ -41,12 +41,26 @@
 </div>
 
 <script>
-document.querySelectorAll('.btn-eliminar-detalle').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-        var idd  = this.getAttribute('data-idd');
-        var idac = this.getAttribute('data-idac');
-        var url  = this.getAttribute('data-url');
-        $('#carrito').load(url + '?idd=' + idd + '&idac=' + idac);
-    });
+
+$(document).off('click', '.btn-eliminar-detalle').on('click', '.btn-eliminar-detalle', function(e) {
+    e.preventDefault();
+    var idd  = $(this).attr('data-idd');
+    var idac = $(this).attr('data-idac');
+    var url  = $(this).attr('data-url');
+    
+    var targetDiv = $('#carrito-modificar').length > 0 ? '#carrito-modificar' : '#carrito';
+    
+    $(targetDiv).load(url + '?idd=' + idd + '&idac=' + idac);
 });
+
+@if(isset($idac))
+    if(document.getElementById('idac_actual')) {
+        document.getElementById('idac_actual').value = '{{ $idac }}';
+        
+        $('#select-cliente, input[name="fecha"], input[name="hora"], #idtc').css({'pointer-events': 'none', 'background-color': '#f0f0f0'});
+        $('#telefono, #nombre, #ap').prop('readonly', true).css('background-color', '#f0f0f0');
+        
+        $('#btn-nueva-cita').show();
+    }
+@endif
 </script>
