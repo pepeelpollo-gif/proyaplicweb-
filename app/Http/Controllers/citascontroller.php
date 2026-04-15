@@ -52,8 +52,7 @@ class citascontroller extends Controller
             $cliente->save();
         }
 
-        // CORRECCIÓN: Buscamos si ya existe una cita para ESE cliente en ESA fecha y ESA hora exacta.
-        // Si no existe, se crea una nueva. Esto evita que los 20 servicios se mezclen.
+       
         $existeCita = DB::select("SELECT idac FROM citas WHERE idc = ? AND fecha = ? AND hora = ? LIMIT 1", [
             $idc, $request->fecha, $request->hora
         ]);

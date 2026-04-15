@@ -38,13 +38,10 @@ $(document).ready(function() {
    $('#btn-agregar').click(function(e) {
         e.preventDefault();
         
-        // CORRECCIÓN: Capturamos la carga completa del carrito antes de desplazar
         $('#carrito').load('{{ route("cargacarritocitas") }}?' + $('#form-cita').serialize(), function() {
             
-            // Calculamos la posición del div de carrito
             var destino = $('#carrito').offset().top - 100;
             
-            // Animación de desplazamiento suave
             $('html, body').animate({
                 scrollTop: destino
             }, 800);
@@ -257,11 +254,5 @@ $(document).ready(function() {
     <div class="spa-section-label" style="margin-bottom:12px;">Carrito de servicios</div>
     <div id="carrito"></div>
 </div>
-
-{{-- BOTÓN IR AL REPORTE --}}
-<div style="margin-top:28px; padding-top:24px; border-top:1px solid var(--gris-clr); display:flex; justify-content:flex-end;">
-    <a href="{{ route('reportecitas') }}" class="spa-btn">Ver reporte general →</a>
-</div>
-
 </div>
 @stop
