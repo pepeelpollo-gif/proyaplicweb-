@@ -22,13 +22,24 @@ $(document).ready(function() {
         mostrarGenero(this.value);
     });
 
-    // CORRECCIÓN: Agregar botón para añadir nuevos servicios usando AJAX
     $('#btn-agregar-mod').click(function(e) {
         e.preventDefault();
-        $('#carrito-modificar').load('{{ route("cargacarritocitas") }}?' + $('#form-modificar').serialize(), function() {
-            $('html, body').animate({
-                scrollTop: $("#carrito-modificar").offset().top - 50
-            }, 500);
+        var datosDelFormulario = $('#form-modificar').serialize();
+
+        $.ajax({
+            url: '{{ route("cargacarritocitas") }}',
+            type: 'GET',
+            data: datosDelFormulario,
+            success: function(respuestaHTML) {
+                $('#carrito-modificar').html(respuestaHTML);
+                setTimeout(function() {
+                    document.getElementById('carrito-modificar').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            },
+            error: function(xhr, status, error) {
+                console.error("Error AJAX: ", error);
+                alert("Error al guardar. Verifica la consola.");
+            }
         });
     });
 
@@ -51,7 +62,6 @@ $(document).ready(function() {
     @csrf
     <input type="hidden" name="idac" value="{{ $cita->idac }}">
 
-    {{-- CLIENTE (solo lectura) - SE AGREGARON los 'name' para el envio ajax --}}
     <div class="spa-section">
         <div class="spa-section-label">Datos del Cliente</div>
         <div class="spa-grid">
@@ -74,7 +84,6 @@ $(document).ready(function() {
         </div>
     </div>
 
-    {{-- DETALLES DE LA CITA --}}
     <div class="spa-section">
         <div class="spa-section-label">Detalles de la Cita</div>
         <div class="spa-grid cols-3">
@@ -127,7 +136,7 @@ $(document).ready(function() {
             </div>
             <div class="spa-field">
                 <label class="spa-label">Estilo</label>
-                <select name="idec" class="spa-select">
+                <select name="idech" class="spa-select">
                     <option value="">— Seleccionar —</option>
                     @foreach($estilos as $e)
                     <option value="{{ $e->idec }}" {{ $detalle && $detalle->idec == $e->idec ? 'selected' : '' }}>
@@ -178,7 +187,7 @@ $(document).ready(function() {
             </div>
             <div class="spa-field">
                 <label class="spa-label">Estilo</label>
-                <select name="idec" class="spa-select">
+                <select name="idecm" class="spa-select">
                     <option value="">— Seleccionar —</option>
                     @foreach($estilos as $e)
                     <option value="{{ $e->idec }}" {{ $detalle && $detalle->idec == $e->idec ? 'selected' : '' }}>
@@ -197,14 +206,14 @@ $(document).ready(function() {
             @foreach($servicios as $s)
                 @if($s->ids != 4)
                 <label class="spa-radio-option">
-                    <input type="radio" name="ids" value="{{ $s->ids }}"
+                    <input type="radio" name="idsh" value="{{ $s->ids }}"
                         {{ $detalle && $detalle->ids == $s->ids ? 'checked' : '' }}>
                     {{ $s->servicio }}
                 </label>
                 @endif
             @endforeach
             <label class="spa-radio-option">
-                <input type="radio" name="ids" value=""
+                <input type="radio" name="idsh" value=""
                     {{ !$detalle || !$detalle->ids ? 'checked' : '' }}> Ninguno
             </label>
         </div>
@@ -217,14 +226,14 @@ $(document).ready(function() {
             @foreach($servicios as $s)
                 @if($s->ids != 3)
                 <label class="spa-radio-option">
-                    <input type="radio" name="ids" value="{{ $s->ids }}"
+                    <input type="radio" name="idsm" value="{{ $s->ids }}"
                         {{ $detalle && $detalle->ids == $s->ids ? 'checked' : '' }}>
                     {{ $s->servicio }}
                 </label>
                 @endif
             @endforeach
             <label class="spa-radio-option">
-                <input type="radio" name="ids" value=""
+                <input type="radio" name="idsm" value=""
                     {{ !$detalle || !$detalle->ids ? 'checked' : '' }}> Ninguno
             </label>
         </div>
@@ -238,7 +247,6 @@ $(document).ready(function() {
 
 </form>
 
-{{-- TABLA DE SERVICIOS REGISTRADOS --}}
 <div style="margin-top:40px;">
     <div style="display:flex; align-items:center; gap:14px; margin-bottom:14px;">
         <div class="spa-section-label" style="margin-bottom:0; flex:1;">
@@ -246,11 +254,9 @@ $(document).ready(function() {
         </div>
     </div>
 
-    {{-- CORRECCIÓN: Ahora reutilizamos tu vista de carrito para tener automáticamente botones de eliminar --}}
     <div id="carrito-modificar">
         @include('citas.carrito', ['carrito' => $todosDetalles])
     </div>
-
 </div>
 
 </div>

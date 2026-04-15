@@ -52,7 +52,8 @@ class citascontroller extends Controller
             $cliente->save();
         }
 
-       
+        $idac = $request->idac ?? $request->idac_actual;
+       if (!$idac) {
         $existeCita = DB::select("SELECT idac FROM citas WHERE idc = ? AND fecha = ? AND hora = ? LIMIT 1", [
             $idc, $request->fecha, $request->hora
         ]);
@@ -66,6 +67,7 @@ class citascontroller extends Controller
         } else {
             $idac = $existeCita[0]->idac;
         }
+       }
 
         $det       = new detalles();
         $det->idac = $idac;
@@ -75,17 +77,22 @@ class citascontroller extends Controller
         if ($request->idtc == 1) {
             $det->idlcm = $request->idlch ?: null;
             $det->idtch = $request->idtch ?: null;
+            $det->idec  = $request->idech ?: null;
+            $det->ids   = $request->idsh  ?: null;
             $det->idf   = null;
         } else {
             $det->idlcm = $request->idlcm ?: null;
             $det->idtch = $request->idtcm ?: null;
+            $det->idec  = $request->idecm ?: null;
+            $det->ids   = $request->idsm  ?: null;
             $det->idf   = $request->idf   ?: null;
         }
 
-        $det->ids = $request->ids ?: null;
         $det->save();
 
-        return view('citas.carrito')->with('carrito', $this->getCarrito($idac));
+       return view('citas.carrito')
+            ->with('carrito', $this->getCarrito($idac))
+            ->with('idac', $idac);
     }
 
     public function reporte()

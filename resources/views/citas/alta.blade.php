@@ -35,16 +35,25 @@ $(document).ready(function() {
         mostrarGenero(this.value);
     });
 
-   $('#btn-agregar').click(function(e) {
-        e.preventDefault();
-        
-        $('#carrito').load('{{ route("cargacarritocitas") }}?' + $('#form-cita').serialize(), function() {
-            
-            var destino = $('#carrito').offset().top - 100;
-            
-            $('html, body').animate({
-                scrollTop: destino
-            }, 800);
+    $('#btn-agregar').click(function(e) {
+        e.preventDefault(); 
+        var datosDelFormulario = $('#form-cita').serialize();
+
+        $.ajax({
+            url: '{{ route("cargacarritocitas") }}',
+            type: 'GET',
+            data: datosDelFormulario,
+            success: function(respuestaHTML) {
+                $('#carrito').html(respuestaHTML);
+                setTimeout(function() {
+                    document.getElementById('carrito').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            },
+            error: function(xhr, status, error) {
+                console.error("Error en AJAX: ", error);
+                console.error("Respuesta del servidor: ", xhr.responseText);
+                alert("Hubo un problema al agregar el servicio. Abre la consola (F12) para más detalles.");
+            }
         });
     });
 
@@ -64,21 +73,15 @@ $(document).ready(function() {
 <div class="spa-container">
 <form id="form-cita">
 
-    {{-- CLIENTE --}}
     <div class="spa-section">
         <div class="spa-section-label">Datos del Cliente</div>
-
         <div class="spa-grid cols-1" style="margin-bottom:16px;">
             <div class="spa-field">
                 <label class="spa-label">Buscar cliente registrado</label>
                 <select id="select-cliente" class="spa-select">
                     <option value="">— Nuevo cliente —</option>
                     @foreach($clientes as $cl)
-                    <option value="{{ $cl->idc }}"
-                            data-idc="{{ $cl->idc }}"
-                            data-nombre="{{ $cl->nombre }}"
-                            data-ap="{{ $cl->ap }}"
-                            data-telefono="{{ $cl->telefono }}">
+                    <option value="{{ $cl->idc }}" data-idc="{{ $cl->idc }}" data-nombre="{{ $cl->nombre }}" data-ap="{{ $cl->ap }}" data-telefono="{{ $cl->telefono }}">
                         {{ $cl->nombre }} {{ $cl->ap }}
                     </option>
                     @endforeach
@@ -106,7 +109,6 @@ $(document).ready(function() {
         </div>
     </div>
 
-    {{-- CITA --}}
     <div class="spa-section">
         <div class="spa-section-label">Detalles de la Cita</div>
         <div class="spa-grid cols-3">
@@ -154,7 +156,7 @@ $(document).ready(function() {
             </div>
             <div class="spa-field">
                 <label class="spa-label">Estilo</label>
-                <select name="idec" class="spa-select">
+                <select name="idech" class="spa-select">
                     <option value="">— Seleccionar —</option>
                     @foreach($estilos as $e)
                     <option value="{{ $e->idec }}">{{ $e->estilo }}</option>
@@ -197,7 +199,7 @@ $(document).ready(function() {
             </div>
             <div class="spa-field">
                 <label class="spa-label">Estilo</label>
-                <select name="idec" class="spa-select">
+                <select name="idecm" class="spa-select">
                     <option value="">— Seleccionar —</option>
                     @foreach($estilos as $e)
                     <option value="{{ $e->idec }}">{{ $e->estilo }}</option>
@@ -214,13 +216,13 @@ $(document).ready(function() {
             @foreach($servicios as $s)
                 @if($s->ids != 4)
                 <label class="spa-radio-option">
-                    <input type="radio" name="ids" value="{{ $s->ids }}">
+                    <input type="radio" name="idsh" value="{{ $s->ids }}">
                     {{ $s->servicio }}
                 </label>
                 @endif
             @endforeach
             <label class="spa-radio-option">
-                <input type="radio" name="ids" value="" checked> Ninguno
+                <input type="radio" name="idsh" value="" checked> Ninguno
             </label>
         </div>
     </div>
@@ -232,13 +234,13 @@ $(document).ready(function() {
             @foreach($servicios as $s)
                 @if($s->ids != 3)
                 <label class="spa-radio-option">
-                    <input type="radio" name="ids" value="{{ $s->ids }}">
+                    <input type="radio" name="idsm" value="{{ $s->ids }}">
                     {{ $s->servicio }}
                 </label>
                 @endif
             @endforeach
             <label class="spa-radio-option">
-                <input type="radio" name="ids" value="" checked> Ninguno
+                <input type="radio" name="idsm" value="" checked> Ninguno
             </label>
         </div>
     </div>
@@ -249,10 +251,11 @@ $(document).ready(function() {
 
 </form>
 
-{{-- CARRITO --}}
 <div style="margin-top:32px;">
     <div class="spa-section-label" style="margin-bottom:12px;">Carrito de servicios</div>
     <div id="carrito"></div>
 </div>
+
+
 </div>
 @stop
