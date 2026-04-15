@@ -22,7 +22,7 @@ class citascontroller extends Controller
         $flequillos   = DB::select("SELECT idf, flequillo FROM flequillo ORDER BY idf ASC");
         $servicios    = DB::select("SELECT ids, servicio FROM servicios_add ORDER BY ids ASC");
         $estilos      = DB::select("SELECT idec, estilo FROM estilo_cabello ORDER BY idec ASC");
-        $clientes     = DB::select("SELECT idc, nombre, ap, telefono FROM clientes ORDER BY nombre ASC");
+        $clientes = DB::select("SELECT idc, nombre, ap, telefono FROM clientes ORDER BY nombre ASC, ap ASC");   
 
         return view('citas.alta')
             ->with('sigue',        $sigue)
@@ -36,6 +36,13 @@ class citascontroller extends Controller
             ->with('estilos',      $estilos)
             ->with('clientes',     $clientes);
     }
+
+    public function getListaClientes()
+{
+    $clientes = DB::select("SELECT idc, nombre, ap, telefono FROM clientes ORDER BY nombre ASC, ap ASC");
+    return response()->json($clientes);
+}
+
 
     public function cargacarrito(Request $request)
     {

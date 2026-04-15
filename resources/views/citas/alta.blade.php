@@ -7,27 +7,45 @@
 <script>
 $(document).ready(function() {
 
-    $('#select-cliente').change(function() {
-        var opt = this.options[this.selectedIndex];
-        if (opt.value !== '') {
-            $('#idc').val(opt.getAttribute('data-idc'));
-            $('#nombre').val(opt.getAttribute('data-nombre'));
-            $('#ap').val(opt.getAttribute('data-ap'));
-            $('#telefono').val(opt.getAttribute('data-telefono'));
-        } else {
-            $('#idc').val('{{ $sigue }}');
-            $('#nombre').val('');
-            $('#ap').val('');
-            $('#telefono').val('');
-        }
-    });
+    function refrescarClientes() {
+        $.ajax({
+            url: '{{ route("getlistaclientes") }}',
+            type: 'GET',
+            success: function(clientes) {
+                var select = $('#select-cliente');
+                var valorActual = select.val(); 
+                
+                select.empty(); 
+                select.append('<option value="">— Nuevo cliente —</option>');
+                
+                $.each(clientes, function(i, cliente) {
+                    select.append(`<option value="${cliente.idc}" 
+                        data-idc="${cliente.idc}" 
+                        data-nombre="${cliente.nombre}" 
+                        data-ap="${cliente.ap}" 
+                        data-telefono="${cliente.telefono}">
+                        ${cliente.nombre} ${cliente.ap}
+                    </option>`);
+                });
+                
+                select.val(valorActual);
+            }
+        });
+    }
 
     function mostrarGenero(g) {
         $('#bloque-hombre, #bloque-mujer, #bloque-servicios-h, #bloque-servicios-m').addClass('spa-hidden');
+        
+        $('select[name="idlch"], select[name="idtch"], select[name="idech"]').prop('required', false);
+        $('select[name="idlcm"], select[name="idtcm"], select[name="idecm"]').prop('required', false);
+
         if (g == 1) {
             $('#bloque-hombre, #bloque-servicios-h').removeClass('spa-hidden');
+            $('select[name="idlch"], select[name="idtch"], select[name="idech"]').prop('required', true);
+            
         } else if (g == 2) {
             $('#bloque-mujer, #bloque-servicios-m').removeClass('spa-hidden');
+            $('select[name="idlcm"], select[name="idtcm"], select[name="idecm"]').prop('required', true);
         }
     }
 
@@ -37,6 +55,13 @@ $(document).ready(function() {
 
     $('#btn-agregar').click(function(e) {
         e.preventDefault(); 
+        
+        var form = $('#form-cita')[0];
+        if (!form.checkValidity()) {
+            form.reportValidity(); 
+            return; 
+        }
+
         var datosDelFormulario = $('#form-cita').serialize();
 
         $.ajax({
@@ -48,10 +73,13 @@ $(document).ready(function() {
                 setTimeout(function() {
                     document.getElementById('carrito').scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }, 100);
+
+                $('select[name="idlch"], select[name="idtch"], select[name="idech"]').val('');
+                $('select[name="idlcm"], select[name="idtcm"], select[name="idecm"], select[name="idf"]').val('');
+                $('input[name="idsh"][value=""], input[name="idsm"][value=""]').prop('checked', true);
             },
             error: function(xhr, status, error) {
                 console.error("Error en AJAX: ", error);
-                console.error("Respuesta del servidor: ", xhr.responseText);
                 alert("Hubo un problema al agregar el servicio. Abre la consola (F12) para más detalles.");
             }
         });
@@ -72,6 +100,8 @@ $(document).ready(function() {
 
 <div class="spa-container">
 <form id="form-cita">
+
+    <input type="hidden" name="idac_actual" id="idac_actual" value="">
 
     <div class="spa-section">
         <div class="spa-section-label">Datos del Cliente</div>
@@ -96,15 +126,31 @@ $(document).ready(function() {
             </div>
             <div class="spa-field">
                 <label class="spa-label">Teléfono</label>
-                <input type="text" name="telefono" id="telefono" class="spa-input" maxlength="15">
+            
+                <input type="text" name="telefono" id="telefono" class="spa-input" 
+                       minlength="10" maxlength="15" 
+                       pattern="[0-9]+" 
+                       title="Debe contener entre 10 y 15 números" 
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '');" 
+                       required>
             </div>
             <div class="spa-field">
                 <label class="spa-label">Nombre</label>
-                <input type="text" name="nombre" id="nombre" class="spa-input">
+                <input type="text" name="nombre" id="nombre" class="spa-input" 
+                       minlength="3" maxlength="30" 
+                       pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" 
+                       title="Solo se aceptan letras (entre 3 y 30 caracteres)" 
+                       oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');" 
+                       required>
             </div>
             <div class="spa-field">
                 <label class="spa-label">Apellido Paterno</label>
-                <input type="text" name="ap" id="ap" class="spa-input">
+                <input type="text" name="ap" id="ap" class="spa-input" 
+                       minlength="3" maxlength="30" 
+                       pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" 
+                       title="Solo se aceptan letras (entre 3 y 30 caracteres)" 
+                       oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');" 
+                       required>
             </div>
         </div>
     </div>
@@ -114,7 +160,7 @@ $(document).ready(function() {
         <div class="spa-grid cols-3">
             <div class="spa-field">
                 <label class="spa-label">Género</label>
-                <select name="idtc" id="idtc" class="spa-select">
+                <select name="idtc" id="idtc" class="spa-select" required>
                     <option value="">— Seleccionar —</option>
                     @foreach($tiposcliente as $t)
                     <option value="{{ $t->idtc }}">{{ $t->tipo_cliente }}</option>
@@ -123,11 +169,11 @@ $(document).ready(function() {
             </div>
             <div class="spa-field">
                 <label class="spa-label">Fecha</label>
-                <input type="date" name="fecha" class="spa-input">
+                <input type="date" name="fecha" class="spa-input" required>
             </div>
             <div class="spa-field">
                 <label class="spa-label">Hora</label>
-                <input type="time" name="hora" class="spa-input">
+                <input type="time" name="hora" class="spa-input" required>
             </div>
         </div>
     </div>
@@ -245,8 +291,9 @@ $(document).ready(function() {
         </div>
     </div>
 
-    <div class="spa-actions">
+    <div class="spa-actions" style="display:flex; gap:12px;">
         <button type="button" id="btn-agregar" class="spa-btn">+ Agregar al carrito</button>
+        <a href="{{ route('altacita') }}" class="spa-btn spa-btn-outline" id="btn-nueva-cita" style="display:none;">Terminar y agendar otra cita distinta</a>
     </div>
 
 </form>
@@ -255,7 +302,6 @@ $(document).ready(function() {
     <div class="spa-section-label" style="margin-bottom:12px;">Carrito de servicios</div>
     <div id="carrito"></div>
 </div>
-
 
 </div>
 @stop

@@ -15,7 +15,7 @@ Route::get('reportecitas',      [citascontroller::class, 'reporte'])->name('repo
 Route::get('eliminadetalle',    [citascontroller::class, 'eliminadetalle'])->name('eliminadetalle');
 Route::get('modificacita',      [citascontroller::class, 'modificacita'])->name('modificacita');
 Route::post('guardamodifica',   [citascontroller::class, 'guardamodifica'])->name('guardamodifica');
-
+Route::get('/getlistaclientes', [citascontroller::class, 'getListaClientes'])->name('getlistaclientes');
 
 
 // --- Rutas de Empleados ---
