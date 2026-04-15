@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\actividades;
 use App\Models\actividadesdetalles;
+use Illuminate\Support\Facades\DB;
+
 
 use Session;
 
@@ -13,7 +15,7 @@ class actividadescontroller extends Controller
     public function cargacarrito(request $request)
     {
        // return $request;
-        $existe = \DB:: select ("SELECT COUNT(*) as cuantos
+        $existe = DB:: select ("SELECT COUNT(*) as cuantos
                                  FROM actividades WHERE ida= $request->ida");
                   $cuantos = $existe[0]->cuantos;               
             if ($cuantos== 0)
@@ -49,7 +51,7 @@ class actividadescontroller extends Controller
                     }
                 
 
-            $acticarrito = \DB::select("SELECT ti.nombre AS tipo,t.nombre AS acti,ad.horas,ad.total,ad.detalle,ad.partes
+            $acticarrito = DB::select("SELECT ti.nombre AS tipo,t.nombre AS acti,ad.horas,ad.total,ad.detalle,ad.partes
 FROM actividadesdetalles AS ad
 INNER JOIN tarea AS t ON t.idta = ad.idtar
 INNER JOIN tipos AS ti ON ti.idt = t.idt
@@ -62,14 +64,14 @@ WHERE ad.ida= $request->ida");
     {
         $idu = Session()->get('idu');
         $nombregerente = Session()->get('nombre');
-        $actividades = \DB::select("SELECT ida FROM actividades ORDER BY ida DESC LIMIT 1");
+        $actividades = DB::select("SELECT ida FROM actividades ORDER BY ida DESC LIMIT 1");
         $cuantos = count($actividades);
         if($cuantos==0){
             $sigue=1;
         }else{
             $sigue = $actividades[0]->ida +1;
         }
-        $empleados = \DB::select("SELECT idemp,CONCAT(nombre,'',apellido)AS nombre
+        $empleados = DB::select("SELECT idemp,CONCAT(nombre,'',apellido)AS nombre
                                   FROM empleados WHERE activo='Si';");
 
         return view('actividades.alta')->with('sigue',$sigue)->with ('idu',$idu)
@@ -77,20 +79,20 @@ WHERE ad.ida= $request->ida");
     }
     public function datosemp(request $request)
     {
-        $empleado = \DB::select("SELECT idemp,CONCAT(nombre,'',apellido)AS nombre,edad,correo,rfc,foto
+        $empleado = DB::select("SELECT idemp,CONCAT(nombre,'',apellido)AS nombre,edad,correo,rfc,foto
                                   FROM empleados WHERE idemp= $request->idemp");
         return view('actividades.infoemp')->with('empleado',$empleado[0]);
     }
     public function datosacti(request $request)
     {
-          $tarea = \DB::select("SELECT idta,nombre
+          $tarea = DB::select("SELECT idta,nombre
                                         FROM tarea
                                         WHERE idt = $request->idta");
                 return view('actividades.cargatarea')->with('tarea',$tarea);
     }
     public function infotar(request $request)
     {
-        $tarea = \DB::select("SELECT idt,nombre,horas,costohora
+        $tarea = DB::select("SELECT idt,nombre,horas,costohora
                                 FROM tarea WHERE idta = $request->idta");
             return view('actividades.infotarea')->with('tarea',$tarea[0]);
     }
